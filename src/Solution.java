@@ -1,3 +1,4 @@
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Stack;
@@ -18,6 +19,16 @@ public class Solution {
 		TreeLinkNode left, right, next;
 
 		TreeLinkNode(int x) {
+			val = x;
+		}
+	}
+
+	public class TreeNode {
+		int val;
+		TreeNode left;
+		TreeNode right;
+
+		TreeNode(int x) {
 			val = x;
 		}
 	}
@@ -376,6 +387,130 @@ public class Solution {
 		return new TreeLinkNode[] { begin, end };
 	}
 
-	public static void main(String[] args) {
+	// Best Time to Buy and Sell Stock III
+	public int maxProfit(int[] prices) {
+		if (prices == null || prices.length == 0) {
+			return 0;
+		}
+		int[] leftProfit = new int[prices.length];
+		int[] rightProfit = new int[prices.length];
+		int min = prices[0];
+		Arrays.fill(leftProfit, 0);
+		for (int i = 1; i < leftProfit.length; i++) {
+			min = Math.min(min, prices[i]);
+			leftProfit[i] = Math.max(leftProfit[i],
+					Math.max(leftProfit[i - 1], prices[i] - min));
+		}
+		int max = prices[prices.length - 1];
+		Arrays.fill(rightProfit, 0);
+		for (int i = rightProfit.length - 2; i >= 0; i--) {
+			max = Math.max(max, prices[i]);
+			rightProfit[i] = Math.max(rightProfit[i],
+					Math.max(rightProfit[i + 1], max - prices[i]));
+		}
+		int profit = 0;
+		for (int i = 0; i < prices.length; i++) {
+			profit = Math.max(profit, leftProfit[i] + rightProfit[i]);
+		}
+		return profit;
+	}
+
+	// Convert Sorted List to Binary Search Tree
+	public TreeNode sortedListToBST(ListNode head) {
+		if (head == null) {
+			return null;
+		}
+		if (head.next == null) {
+			return new TreeNode(head.val);
+		}
+		ListNode prev = null;
+		ListNode post = null;
+		ListNode walker = head;
+		ListNode runner = head;
+		while (runner != null && runner.next != null) {
+			prev = walker;
+			walker = walker.next;
+			runner = runner.next.next;
+		}
+		prev.next = null;
+		post = walker.next;
+		walker.next = null;
+		TreeNode root = new TreeNode(walker.val);
+		root.left = sortedListToBST(head);
+		root.right = sortedListToBST(post);
+		return root;
+	}
+
+	// Permutations
+	public ArrayList<ArrayList<Integer>> permute(int[] num) {
+		if (num == null) {
+			return null;
+		}
+		ArrayDeque<ArrayList<Integer>> queue = new ArrayDeque<ArrayList<Integer>>();
+		ArrayList<Integer> empty = new ArrayList<Integer>();
+		queue.offer(empty);
+		for (int i = 0; i < num.length; i++) {
+			int len = queue.size();
+			for (int j = 0; j < len; j++) {
+				ArrayList<Integer> base = queue.poll();
+				for (int k = 0; k <= base.size(); k++) {
+					ArrayList<Integer> permutation = new ArrayList<Integer>(
+							base);
+					permutation.add(k, num[i]);
+					queue.offer(permutation);
+				}
+			}
+		}
+		return new ArrayList<ArrayList<Integer>>(queue);
+	}
+
+	// Merge Sorted Array
+	public void merge(int A[], int m, int B[], int n) {
+		if (A == null || B == null || m < 0 || n < 0) {
+			return;
+		}
+		int index = m + n - 1;
+		int indexA = m - 1;
+		int indexB = n - 1;
+		while (indexA >= 0 && indexB >= 0) {
+			A[index--] = A[indexA] > B[indexB] ? A[indexA--] : B[indexB--];
+		}
+		while (indexB >= 0) {
+			A[index--] = B[indexB--];
+		}
+	}
+
+	// Median of Two Sorted Arrays
+	public double findMedianSortedArrays(int A[], int B[]) {
+		return findMedianSortedArraysHelper(A, B,
+				Math.max(0, (A.length - B.length) / 2),
+				Math.min(A.length - 1, (A.length + B.length) / 2));
+	}
+
+	private double findMedianSortedArraysHelper(int[] A, int[] B, int left,
+			int right) {
+		if (left > right) {
+			return findMedianSortedArraysHelper(B, A,
+					Math.max(0, (B.length - A.length) / 2),
+					Math.min(B.length - 1, (B.length + A.length) / 2));
+		}
+		int mid = left + (right - left) / 2;
+		int compare = (A.length + B.length) / 2 - mid;
+
+		if ((compare == 0 || B[compare - 1] <= A[mid])
+				&& (compare == B.length || A[mid] <= B[compare])) {
+			if ((A.length + B.length) % 2 != 0) {
+				return A[mid];
+			} else {
+				int prevA = mid > 0 ? A[mid - 1] : Integer.MIN_VALUE;
+				int prevB = compare > 0 ? B[compare - 1] : Integer.MIN_VALUE;
+				return (A[mid] + Math.max(prevA, prevB)) / 2D;
+			}
+		}
+		if (compare <= 0 || A[mid] > B[compare - 1]) {
+			return findMedianSortedArraysHelper(A, B, left, mid - 1);
+		} else {
+			return findMedianSortedArraysHelper(A, B, mid + 1, right);
+		}
 	}
 }
