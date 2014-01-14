@@ -2,6 +2,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Set;
 import java.util.Stack;
 
 public class Solution {
@@ -624,6 +625,166 @@ public class Solution {
 		return r;
 	}
 
+	// Reverse Bits
+	public int reverseBits(int x) {
+		int mask = 1;
+		int result = 0;
+		for (int i = Integer.SIZE - 1; i >= 0; i--) {
+			result |= ((mask & x) << i);
+			x >>>= 1;
+		}
+		return result;
+	}
+
+	// Convert Sorted Array to Binary Search Tree
+	public TreeNode sortedArrayToBST(int[] num) {
+		if (num == null) {
+			return null;
+		}
+		return sortedArrayToBSTHelper(num, 0, num.length - 1);
+	}
+
+	private TreeNode sortedArrayToBSTHelper(int[] num, int left, int right) {
+		if (left > right) {
+			return null;
+		}
+		int mid = left + (right - left) / 2;
+		TreeNode root = new TreeNode(num[mid]);
+		root.left = sortedArrayToBSTHelper(num, left, mid - 1);
+		root.right = sortedArrayToBSTHelper(num, mid + 1, right);
+		return root;
+	}
+
+	// Reverse Linked List II
+	public ListNode reverseBetween(ListNode head, int m, int n) {
+		ListNode start = head;
+		ListNode prevStart = null;
+		ListNode end = head;
+		ListNode postEnd = null;
+		for (int i = 0; i < n - m; i++) {
+			end = end.next;
+		}
+		for (int i = 0; i < m - 1; i++) {
+			prevStart = start;
+			start = start.next;
+			end = end.next;
+		}
+		postEnd = end.next;
+		reverseBetweenHelper(start, end);
+		start.next = postEnd;
+		if (prevStart == null) {
+			return end;
+		} else {
+			prevStart.next = end;
+			return head;
+		}
+	}
+
+	private void reverseBetweenHelper(ListNode start, ListNode end) {
+		if (start == end) {
+			return;
+		}
+		ListNode prev = start;
+		ListNode curr = prev.next;
+		ListNode post = curr.next;
+		while (prev != end) {
+			curr.next = prev;
+			prev = curr;
+			curr = post;
+			post = post == null ? null : post.next;
+		}
+	}
+
+	// Search for a Range
+	public int[] searchRange(int[] A, int target) {
+		return new int[] { searchRangeHelper(A, target, 0, A.length - 1, -1),
+				searchRangeHelper(A, target, 0, A.length - 1, 1) };
+	}
+
+	private int searchRangeHelper(int[] A, int target, int start, int end,
+			int step) {
+		if (start > end) {
+			return -1;
+		}
+		int mid = start + (end - start) / 2;
+		if (A[mid] < target) {
+			return searchRangeHelper(A, target, mid + 1, end, step);
+		} else if (A[mid] > target) {
+			return searchRangeHelper(A, target, start, mid - 1, step);
+		} else {
+			if (step < 0) {
+				if (mid == 0 || A[mid + step] < target) {
+					return mid;
+				} else {
+					return searchRangeHelper(A, target, start, mid - 1, step);
+				}
+			} else {
+				if (mid == A.length - 1 || A[mid + step] > target) {
+					return mid;
+				} else {
+					return searchRangeHelper(A, target, mid + 1, end, step);
+				}
+			}
+		}
+	}
+
+	// Word Break II
+	public ArrayList<String> wordBreak(String s, Set<String> dict) {
+		HashMap<String, ArrayList<String>> memo = new HashMap<String, ArrayList<String>>();
+		return wordBreakHelper(s, dict, 0, 0, memo);
+	}
+
+	private ArrayList<String> wordBreakHelper(String s, Set<String> dict,
+			int start, int end, HashMap<String, ArrayList<String>> memo) {
+		String key = start + "-" + end;
+		if (memo.containsKey(key)) {
+			return memo.get(key);
+		}
+		ArrayList<String> result = new ArrayList<String>();
+		String word = new String(s.substring(start, end + 1));
+		if (end == s.length() - 1) {
+			if (dict.contains(word)) {
+				result.add(word);
+			}
+			return result;
+		}
+		ArrayList<String> partialResult1 = wordBreakHelper(s, dict, start,
+				end + 1, memo);
+		if (dict.contains(word)) {
+			ArrayList<String> partialResult2 = wordBreakHelper(s, dict,
+					end + 1, end + 1, memo);
+			for (String string : partialResult2) {
+				result.add(word + " " + string);
+			}
+		}
+		result.addAll(partialResult1);
+		memo.put(key, result);
+		return result;
+	}
+
+	// Permutation Sequence
+	public String getPermutation(int n, int k) {
+		StringBuffer sb = new StringBuffer();
+		for (int i = 1; i <= n; i++) {
+			sb.append(i);
+		}
+		int m = 1;
+		for (int i = 1; i <= n - 1; i++) {
+			m *= i;
+		}
+		StringBuffer result = new StringBuffer();
+		while (sb.length() > 0) {
+			int r = (k - 1) / m;
+			result.append(sb.charAt(r));
+			sb.deleteCharAt(r);
+			n--;
+			k -= r * m;
+			m /= (n == 0 ? 1 : n);
+		}
+		return result.toString();
+	}
+
 	public static void main(String[] args) {
+		// Solution s = new Solution();
 	}
 }
