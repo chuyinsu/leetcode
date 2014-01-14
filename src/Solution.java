@@ -1,6 +1,7 @@
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Stack;
 
 public class Solution {
@@ -512,5 +513,117 @@ public class Solution {
 		} else {
 			return findMedianSortedArraysHelper(A, B, mid + 1, right);
 		}
+	}
+
+	// Two Sum
+	public int[] twoSum(int[] numbers, int target) {
+		HashMap<Integer, Integer> memo = new HashMap<Integer, Integer>();
+		for (int i = 0; i < numbers.length; i++) {
+			int remain = target - numbers[i];
+			if (memo.containsKey(remain)) {
+				return new int[] { memo.get(remain) + 1, i + 1 };
+			} else {
+				memo.put(numbers[i], i);
+			}
+		}
+		return null;
+	}
+
+	// Regular Expression Matching
+	public boolean isMatch(String s, String p) {
+		if (s == null || p == null) {
+			return false;
+		}
+		return isMatchHelper(s, p, 0, 0);
+	}
+
+	private boolean isMatchHelper(String s, String p, int indexS, int indexP) {
+		if (indexS == s.length() && indexP == p.length()) {
+			return true;
+		} else if (indexP == p.length()) {
+			return false;
+		} else if (indexP < p.length() - 1 && p.charAt(indexP + 1) == '*') {
+			int match = 0;
+			while (indexS + match < s.length()
+					&& (s.charAt(indexS + match) == p.charAt(indexP) || p
+							.charAt(indexP) == '.')) {
+				match++;
+			}
+			for (int i = 0; i <= match; i++) {
+				if (isMatchHelper(s, p, indexS + i, indexP + 2)) {
+					return true;
+				}
+			}
+			return false;
+		} else if (indexS == s.length()) {
+			return false;
+		} else if (s.charAt(indexS) == p.charAt(indexP)
+				|| p.charAt(indexP) == '.') {
+			return isMatchHelper(s, p, indexS + 1, indexP + 1);
+		} else {
+			return false;
+		}
+	}
+
+	// Longest Consecutive Sequence
+	public int longestConsecutive(int[] num) {
+		if (num == null || num.length == 0) {
+			return 0;
+		}
+		int max = 1;
+		HashMap<Integer, Integer> memo = new HashMap<Integer, Integer>();
+		for (int i : num) {
+			if (!memo.containsKey(i)) {
+				int left = memo.containsKey(i - 1) ? i - 1 - memo.get(i - 1)
+						+ 1 : i;
+				int right = memo.containsKey(i + 1) ? i + 1 + memo.get(i + 1)
+						- 1 : i;
+				int len = right - left + 1;
+				max = Math.max(max, len);
+				memo.put(left, len);
+				memo.put(right, len);
+				if (left != i && right != i) {
+					memo.put(i, len);
+				}
+			}
+		}
+		return max;
+	}
+
+	// Construct Binary Tree from Preorder and Inorder Traversal
+	public TreeNode buildTree(int[] preorder, int[] inorder) {
+		return buildTreeHelper(preorder, 0, preorder.length - 1, inorder, 0,
+				inorder.length - 1);
+	}
+
+	private TreeNode buildTreeHelper(int[] preorder, int i1, int j1,
+			int inorder[], int i2, int j2) {
+		if (i1 > j1 || i2 > j2) {
+			return null;
+		}
+		TreeNode root = new TreeNode(preorder[i1]);
+		for (int i = i2; i <= j2; i++) {
+			if (inorder[i] == preorder[i1]) {
+				root.left = buildTreeHelper(preorder, i1 + 1, i1 + i - i2,
+						inorder, i2, i - 1);
+				root.right = buildTreeHelper(preorder, i1 + i - i2 + 1, j1,
+						inorder, i + 1, j2);
+				break;
+			}
+		}
+		return root;
+	}
+
+	// Reverse Integer
+	public int reverse(int x) {
+		int r = 0;
+		while (x != 0) {
+			r = r * 10 + x % 10;
+			x /= 10;
+		}
+		return r;
+	}
+
+	public static void main(String[] args) {
 	}
 }
