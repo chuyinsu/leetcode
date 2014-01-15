@@ -784,6 +784,159 @@ public class Solution {
 		return result.toString();
 	}
 
+	// Construct Binary Tree from Inorder and Postorder Traversal
+	public TreeNode buildTreeII(int[] inorder, int[] postorder) {
+		if (inorder == null || postorder == null) {
+			return null;
+		}
+		return buildTreeHelperII(inorder, 0, inorder.length - 1, postorder, 0,
+				postorder.length - 1);
+	}
+
+	private TreeNode buildTreeHelperII(int[] inorder, int i1, int j1,
+			int[] postorder, int i2, int j2) {
+		if (i1 > j1 || i2 > j2) {
+			return null;
+		}
+		TreeNode root = new TreeNode(postorder[j2]);
+		for (int i = i1; i <= j1; i++) {
+			if (inorder[i] == postorder[j2]) {
+				root.left = buildTreeHelperII(inorder, i1, i - 1, postorder,
+						i2, i2 + i - i1 - 1);
+				root.right = buildTreeHelperII(inorder, i + 1, j1, postorder,
+						i2 + i - i1, j2 - 1);
+				break;
+			}
+		}
+		return root;
+	}
+
+	// Simple Sorting
+
+	// O(n^2) simple but slow
+	public void bubbleSort(int[] data) {
+		// move backward from the last index to 1
+		for (int out = data.length - 1; out >= 1; out--) {
+			// move forward from 0 to the right
+			// BUBBLE up the largest value to the right
+			for (int in = 0; in < out; in++) {
+				if (data[in] > data[in + 1])
+					swap(data, in, in + 1);
+			}
+		}
+	}
+
+	// O(n^2) faster than bubble sort because swap only happens in the outer
+	// loop
+	public void selectionSort(int[] data) {
+		int min; // set min variable for tmp min value
+		// move forward to right to SELECT the minimum value
+		for (int out = 0; out < data.length - 1; out++) {
+			min = out; // set initial min index to be out
+			// move forward to right from out+1 to the end
+			for (int in = out + 1; in < data.length; in++) {
+				// if data is smaller than current min value
+				if (data[in] < data[min])
+					min = in; // set a new min index
+			}
+			// swap min value with the first one as we move forward to the right
+			// swapping is happening in the outer loop
+			if (out != min)
+				swap(data, out, min);
+		}
+	}
+
+	// O(n^2) fastest among the three 1. less number of comparisons 2. uses
+	// shifting instead of swapping
+	public void insertionSort(int[] data) {
+		// start from 1 till the last index
+		for (int out = 1; out < data.length; out++) {
+			int tmp = data[out]; // save the first value as tmp
+			int in = out; // initial in variable index
+			// move backward till it finds the location to insert
+			while (in > 0 && data[in - 1] >= tmp) {
+				// shift to right to make a room
+				data[in] = data[in - 1];
+				in--;
+			}
+			// finally INSERT the tmp value to the right position
+			data[in] = tmp;
+		}
+	}
+
+	// helper method to swap two values in an array
+	private void swap(int[] data, int one, int two) {
+		int tmp = data[one];
+		data[one] = data[two];
+		data[two] = tmp;
+	}
+
+	// Remove Duplicates from Sorted Array
+	public int removeDuplicates(int[] A) {
+		if (A == null) {
+			return 0;
+		} else if (A.length < 2) {
+			return A.length;
+		}
+		int scan = 1;
+		int slot = 1;
+		while (scan < A.length) {
+			if (A[scan] != A[slot - 1]) {
+				A[slot++] = A[scan++];
+			} else {
+				scan++;
+			}
+		}
+		return slot;
+	}
+
+	// Remove Duplicates from Sorted List
+	public ListNode deleteDuplicates(ListNode head) {
+		ListNode tail = head;
+		ListNode scan = null;
+		while (tail != null) {
+			scan = tail.next;
+			while (scan != null && scan.val == tail.val) {
+				scan = scan.next;
+			}
+			tail.next = scan;
+			tail = scan;
+		}
+		return head;
+	}
+
+	// Same Tree
+	public boolean isSameTree(TreeNode p, TreeNode q) {
+		if (p == null && q == null) {
+			return true;
+		} else if (p == null || q == null) {
+			return false;
+		} else if (p.val == q.val) {
+			return isSameTree(p.left, q.left) && isSameTree(p.right, q.right);
+		} else {
+			return false;
+		}
+	}
+
+	// Remove Duplicates from Sorted Array II
+	public int removeDuplicatesII(int[] A) {
+		if (A == null) {
+			return 0;
+		} else if (A.length < 3) {
+			return A.length;
+		}
+		int scan = 2;
+		int slot = 2;
+		while (scan < A.length) {
+			if (A[scan] != A[slot - 1] || A[scan] != A[slot - 2]) {
+				A[slot++] = A[scan++];
+			} else {
+				scan++;
+			}
+		}
+		return slot;
+	}
+
 	public static void main(String[] args) {
 		// Solution s = new Solution();
 	}
