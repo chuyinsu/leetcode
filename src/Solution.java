@@ -937,6 +937,56 @@ public class Solution {
 		return slot;
 	}
 
+	// Minimum Path Sum
+	public int minPathSum(int[][] grid) {
+		if (grid == null || grid.length == 0 || grid[0].length == 0) {
+			return -1;
+		}
+		int[][] memo = new int[grid.length][grid[0].length];
+		memo[0][0] = grid[0][0];
+		for (int j = 1; j < memo[0].length; j++) {
+			memo[0][j] = grid[0][j] + memo[0][j - 1];
+		}
+		for (int i = 1; i < memo.length; i++) {
+			memo[i][0] = grid[i][0] + memo[i - 1][0];
+		}
+		for (int i = 1; i < memo.length; i++) {
+			for (int j = 1; j < memo[i].length; j++) {
+				memo[i][j] = Math.min(memo[i - 1][j], memo[i][j - 1])
+						+ grid[i][j];
+			}
+		}
+		return memo[memo.length - 1][memo[0].length - 1];
+	}
+
+	// Rotate List
+	public ListNode rotateRight(ListNode head, int n) {
+		ListNode iter = head;
+		int len = 0;
+		while (iter != null) {
+			len++;
+			iter = iter.next;
+		}
+		n = len == 0 ? 0 : n % len;
+		if (n == 0) {
+			return head;
+		}
+		ListNode prev = null;
+		ListNode start = head;
+		ListNode end = head;
+		for (int i = 0; i < n - 1; i++) {
+			end = end.next;
+		}
+		while (end.next != null) {
+			prev = start;
+			start = start.next;
+			end = end.next;
+		}
+		prev.next = null;
+		end.next = head;
+		return start;
+	}
+
 	public static void main(String[] args) {
 		// Solution s = new Solution();
 	}
