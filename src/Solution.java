@@ -2,6 +2,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.Stack;
 
@@ -346,7 +347,7 @@ public class Solution {
 	}
 
 	// Populating Next Right Pointers in Each Node II
-	public void connect(TreeLinkNode root) {
+	public void connectII(TreeLinkNode root) {
 		if (root == null) {
 			return;
 		}
@@ -985,6 +986,406 @@ public class Solution {
 		prev.next = null;
 		end.next = head;
 		return start;
+	}
+
+	// Text Justification
+	public ArrayList<String> fullJustify(String[] words, int L) {
+		if (words == null) {
+			return null;
+		}
+		ArrayList<String> result = new ArrayList<String>();
+		if (words.length == 0) {
+			return result;
+		}
+		ArrayList<Integer> memo = new ArrayList<Integer>();
+		memo.add(0);
+		int index = 1;
+		int len = words[0].length();
+		while (index < words.length) {
+			int wordLen = words[index].length();
+			if (len + wordLen + 1 <= L) {
+				len += (wordLen + 1);
+			} else {
+				len = wordLen;
+				memo.add(index);
+			}
+			index++;
+		}
+		memo.add(index);
+		for (int i = 0; i < memo.size() - 1; i++) {
+			StringBuffer sb = new StringBuffer();
+			int start = memo.get(i);
+			int end = memo.get(i + 1) - 1;
+			if (i == memo.size() - 2) {
+				sb.append(words[start]);
+				for (int j = start + 1; j <= end; j++) {
+					sb.append(" " + words[j]);
+				}
+				while (sb.length() < L) {
+					sb.append(" ");
+				}
+			} else {
+				int sigma = 0;
+				for (int j = start; j <= end; j++) {
+					sigma += words[j].length();
+				}
+				int spaceNum = (end == start) ? (L - sigma) : (L - sigma)
+						/ (end - start);
+				StringBuffer space = new StringBuffer();
+				for (int j = 0; j < spaceNum; j++) {
+					space.append(" ");
+				}
+				int extra = (end == start) ? 0 : (L - sigma) % (end - start);
+				for (int j = start; j <= end - 1; j++) {
+					sb.append(words[j]);
+					sb.append(space);
+					if (extra > 0) {
+						sb.append(" ");
+						extra--;
+					}
+				}
+				if (start == end) {
+					sb.append(words[start]);
+					sb.append(space);
+				} else {
+					sb.append(words[end]);
+				}
+			}
+			result.add(sb.toString());
+		}
+		return result;
+	}
+
+	// CareerCup 6579701673885696
+	public int[][] divide(int A[]) {
+		if (A == null) {
+			return null;
+		}
+		int sum = 0;
+		for (int i : A) {
+			sum += i;
+		}
+		HashSet<Integer> half = divideHelper(A, sum / 2, 0, A.length / 2);
+		int[][] result = new int[A.length / 2][A.length / 2];
+		int indexA = 0;
+		int indexB = 0;
+		for (int i = 0; i < A.length; i++) {
+			if (half.contains(i)) {
+				result[0][indexA++] = A[i];
+			} else {
+				result[1][indexB++] = A[i];
+			}
+		}
+		return result;
+	}
+
+	private HashSet<Integer> divideHelper(int[] A, int target, int index, int n) {
+		if (target == 0 && n == 0) {
+			return new HashSet<Integer>();
+		} else if (n == 0) {
+			return null;
+		}
+		HashSet<Integer> result = null;
+		for (int i = index; i < A.length; i++) {
+			result = divideHelper(A, target - A[i], i + 1, n - 1);
+			if (result != null) {
+				result.add(i);
+				break;
+			}
+		}
+		return result;
+	}
+
+	public double findMedianSortedArraysEqualLength(int A[], int B[]) {
+		if (A == null || B == null || A.length == 0 || B.length == 0
+				|| A.length != B.length) {
+			return Double.NaN;
+		}
+		return findMedianSortedArraysEqualLengthHelper(A, 0, A.length - 1, B,
+				0, B.length - 1);
+	}
+
+	private double findMedianSortedArraysEqualLengthHelper(int A[], int leftA,
+			int rightA, int[] B, int leftB, int rightB) {
+		int lenA = rightA - leftA + 1;
+		int lenB = rightB - leftB + 1;
+		assert (lenA == lenB);
+		int len = lenA;
+		if (len == 1) {
+			return (A[leftA] + B[leftB]) / 2D;
+		} else if (len == 2) {
+			int sum = Math.max(A[leftA], B[leftB])
+					+ Math.min(A[rightA], B[rightB]);
+			return sum / 2D;
+		}
+		int indexMidA = leftA + (rightA - leftA) / 2;
+		int indexMidB = leftB + (rightB - leftB) / 2;
+		int midA = (len % 2 == 0) ? (A[indexMidA] + A[indexMidA + 1]) / 2
+				: A[indexMidA];
+		int midB = (len % 2 == 0) ? (B[indexMidB] + B[indexMidB + 1]) / 2
+				: B[indexMidB];
+		if (midA == midB) {
+			if (len % 2 == 0) {
+				return findMedianSortedArraysEqualLengthHelper(A, indexMidA,
+						indexMidA + 1, B, indexMidB, indexMidB + 1);
+			} else {
+				return findMedianSortedArraysEqualLengthHelper(A, indexMidA,
+						indexMidA, B, indexMidB, indexMidB);
+			}
+		} else if (midA > midB) {
+			if (len % 2 == 0) {
+				return findMedianSortedArraysEqualLengthHelper(A, leftA,
+						indexMidA + 1, B, indexMidB, rightB);
+			} else {
+				return findMedianSortedArraysEqualLengthHelper(A, leftA,
+						indexMidA, B, indexMidB, rightB);
+			}
+		} else {
+			if (len % 2 == 0) {
+				return findMedianSortedArraysEqualLengthHelper(A, indexMidA,
+						rightA, B, leftB, indexMidB + 1);
+			} else {
+				return findMedianSortedArraysEqualLengthHelper(A, indexMidA,
+						rightA, B, leftB, indexMidB);
+			}
+		}
+	}
+
+	// Populating Next Right Pointers in Each Node
+	public void connect(TreeLinkNode root) {
+		if (root == null) {
+			return;
+		}
+		TreeLinkNode prev = root;
+		TreeLinkNode curr = root.left;
+		while (curr != null) {
+			TreeLinkNode iter1 = prev;
+			TreeLinkNode iter2 = curr;
+			while (iter1 != null) {
+				iter2.next = iter1.right;
+				iter1 = iter1.next;
+				iter2 = iter2.next;
+				if (iter1 != null) {
+					iter2.next = iter1.left;
+					iter2 = iter2.next;
+				}
+			}
+			prev = curr;
+			curr = curr.left;
+		}
+	}
+
+	// Path Sum
+	public boolean hasPathSum(TreeNode root, int sum) {
+		if (root == null) {
+			return false;
+		} else if (root.val == sum && root.left == null && root.right == null) {
+			return true;
+		} else {
+			return hasPathSum(root.left, sum - root.val)
+					|| hasPathSum(root.right, sum - root.val);
+		}
+	}
+
+	// Binary Tree Inorder Traversal
+	public ArrayList<Integer> inorderTraversal(TreeNode root) {
+		ArrayList<Integer> result = new ArrayList<Integer>();
+		Stack<TreeNode> stack = new Stack<TreeNode>();
+		while (root != null) {
+			while (root != null) {
+				stack.push(root);
+				root = root.left;
+			}
+			root = stack.pop();
+			result.add(root.val);
+			while (!stack.isEmpty() && root.right == null) {
+				root = stack.pop();
+				result.add(root.val);
+			}
+			root = root.right;
+		}
+		return result;
+	}
+
+	// Combination Sum
+	public ArrayList<ArrayList<Integer>> combinationSum(int[] candidates,
+			int target) {
+		Arrays.sort(candidates);
+		return combinationSumHelper(candidates, target, candidates.length - 1);
+	}
+
+	private ArrayList<ArrayList<Integer>> combinationSumHelper(
+			int[] candidates, int target, int index) {
+		ArrayList<ArrayList<Integer>> result = new ArrayList<ArrayList<Integer>>();
+		if (target == 0) {
+			ArrayList<Integer> empty = new ArrayList<Integer>();
+			result.add(empty);
+			return result;
+		} else if (index < 0 || target < 0) {
+			return null;
+		}
+		for (int i = 0; i <= target / candidates[index]; i++) {
+			ArrayList<ArrayList<Integer>> partialResult = combinationSumHelper(
+					candidates, target - i * candidates[index], index - 1);
+			if (partialResult != null) {
+				for (ArrayList<Integer> al : partialResult) {
+					for (int j = 0; j < i; j++) {
+						al.add(candidates[index]);
+					}
+				}
+				result.addAll(partialResult);
+			}
+		}
+		return result;
+	}
+
+	// 4Sum
+	public ArrayList<ArrayList<Integer>> fourSum(int[] num, int target) {
+		ArrayList<ArrayList<Integer>> result = new ArrayList<ArrayList<Integer>>();
+		Arrays.sort(num);
+		for (int i = 0; i < num.length - 3; i++) {
+			if (i > 0 && num[i] == num[i - 1]) {
+				continue;
+			}
+			for (int j = i + 1; j < num.length - 2; j++) {
+				if (j > i + 1 && num[j] == num[j - 1]) {
+					continue;
+				}
+				int left = j + 1;
+				int right = num.length - 1;
+				int rest = target - num[i] - num[j];
+				while (left < right) {
+					int sum = num[left] + num[right];
+					if (sum == rest) {
+						ArrayList<Integer> found = new ArrayList<Integer>();
+						found.add(num[i]);
+						found.add(num[j]);
+						found.add(num[left]);
+						found.add(num[right]);
+						result.add(found);
+						do {
+							left++;
+						} while (left < num.length
+								&& num[left] == num[left - 1]);
+						do {
+							right--;
+						} while (right >= 0 && num[right] == num[right + 1]);
+					} else if (sum < rest) {
+						left++;
+					} else {
+						right--;
+					}
+				}
+			}
+		}
+		return result;
+	}
+
+	// Symmetric Tree
+	public boolean isSymmetric(TreeNode root) {
+		if (root == null) {
+			return true;
+		}
+		return isSymmetricHelper(root.left, root.right);
+	}
+
+	private boolean isSymmetricHelper(TreeNode root1, TreeNode root2) {
+		if (root1 == null && root2 == null) {
+			return true;
+		} else if (root1 == null || root2 == null) {
+			return false;
+		} else if (root1.val == root2.val) {
+			return isSymmetricHelper(root1.left, root2.right)
+					&& isSymmetricHelper(root1.right, root2.left);
+		} else {
+			return false;
+		}
+	}
+
+	// Reverse Nodes in k-Group
+	public ListNode reverseKGroup(ListNode head, int k) {
+		if (head == null || k < 2) {
+			return head;
+		}
+		ListNode finalHead = head;
+		ListNode prev = null;
+		ListNode start = head;
+		ListNode end = head;
+		ListNode post = null;
+		while (end != null) {
+			for (int i = 0; i < k - 1 && end != null; i++) {
+				end = end.next;
+			}
+			if (end != null) {
+				if (finalHead == head) {
+					finalHead = end;
+				}
+				post = end.next;
+				reverseKGroupHelper(start, end);
+				if (prev != null) {
+					prev.next = end;
+				}
+				start.next = post;
+				prev = start;
+				start = post;
+				end = post;
+			}
+		}
+		return finalHead;
+	}
+
+	private void reverseKGroupHelper(ListNode start, ListNode end) {
+		if (start == end) {
+			return;
+		}
+		ListNode prev = start;
+		ListNode curr = prev.next;
+		ListNode post = curr.next;
+		while (prev != end) {
+			curr.next = prev;
+			prev = curr;
+			curr = post;
+			post = post == null ? null : post.next;
+		}
+	}
+
+	// Candy
+	public int candy(int[] ratings) {
+		int candies[] = new int[ratings.length];
+		Arrays.fill(candies, 0);
+		candies[0] = 1;
+		for (int i = 0; i < candies.length - 1; i++) {
+			if (ratings[i] < ratings[i + 1] && candies[i] >= candies[i + 1]) {
+				candies[i + 1] = candies[i] + 1;
+			} else {
+				candies[i + 1] = 1;
+			}
+		}
+		for (int i = candies.length - 1; i > 0; i--) {
+			if (ratings[i] < ratings[i - 1] && candies[i] >= candies[i - 1]) {
+				candies[i - 1] = candies[i] + 1;
+			}
+		}
+		int sum = 0;
+		for (int i = 0; i < candies.length; i++) {
+			sum += candies[i];
+		}
+		return sum;
+	}
+
+	// Maximum Subarray
+	public int maxSubArray(int[] A) {
+		if (A == null || A.length == 0) {
+			return 0;
+		}
+		int sum = 0;
+		int max = A[0];
+		for (int i = 0; i < A.length; i++) {
+			sum += A[i];
+			max = Math.max(max, sum);
+			sum = sum < 0 ? 0 : sum;
+		}
+		return max;
 	}
 
 	public static void main(String[] args) {
