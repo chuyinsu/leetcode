@@ -3,6 +3,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Queue;
 import java.util.Set;
 import java.util.Stack;
 
@@ -33,6 +34,21 @@ public class Solution {
 
 		TreeNode(int x) {
 			val = x;
+		}
+	}
+
+	public class Interval {
+		int start;
+		int end;
+
+		Interval() {
+			start = 0;
+			end = 0;
+		}
+
+		Interval(int s, int e) {
+			start = s;
+			end = e;
 		}
 	}
 
@@ -1386,6 +1402,255 @@ public class Solution {
 			sum = sum < 0 ? 0 : sum;
 		}
 		return max;
+	}
+
+	// Pascal's Triangle
+	public ArrayList<ArrayList<Integer>> generate(int numRows) {
+		ArrayList<ArrayList<Integer>> result = new ArrayList<ArrayList<Integer>>();
+		if (numRows <= 0) {
+			return result;
+		}
+		ArrayList<Integer> prev = new ArrayList<Integer>();
+		prev.add(1);
+		result.add(prev);
+		for (int i = 1; i < numRows; i++) {
+			ArrayList<Integer> curr = new ArrayList<Integer>();
+			for (int j = 0; j <= prev.size(); j++) {
+				int before = j == 0 ? 0 : prev.get(j - 1);
+				int now = j == prev.size() ? 0 : prev.get(j);
+				curr.add(before + now);
+			}
+			result.add(curr);
+			prev = curr;
+		}
+		return result;
+	}
+
+	// Unique Binary Search Trees
+	public int numTrees(int n) {
+		if (n < 0) {
+			return 0;
+		}
+		int[] memo = new int[n + 1];
+		Arrays.fill(memo, 0);
+		memo[0] = 1;
+		memo[1] = 1;
+		for (int i = 2; i <= n; i++) {
+			for (int j = 0; j < i; j++) {
+				memo[i] += memo[j] * memo[i - j - 1];
+			}
+		}
+		return memo[n];
+	}
+
+	// Binary Tree Level Order Traversal II
+	public ArrayList<ArrayList<Integer>> levelOrderBottom(TreeNode root) {
+		ArrayList<ArrayList<Integer>> result = new ArrayList<ArrayList<Integer>>();
+		if (root == null) {
+			return result;
+		}
+		Stack<ArrayList<Integer>> stack = new Stack<ArrayList<Integer>>();
+		Queue<TreeNode> queue = new ArrayDeque<TreeNode>();
+		queue.offer(root);
+		int levelNum = 1;
+		while (!queue.isEmpty()) {
+			ArrayList<Integer> level = new ArrayList<Integer>();
+			for (int i = 0; i < levelNum; i++) {
+				TreeNode node = queue.poll();
+				if (node.left != null) {
+					queue.offer(node.left);
+				}
+				if (node.right != null) {
+					queue.offer(node.right);
+				}
+				level.add(node.val);
+			}
+			stack.push(level);
+			levelNum = queue.size();
+		}
+		while (!stack.isEmpty()) {
+			result.add(stack.pop());
+		}
+		return result;
+	}
+
+	// Integer to Roman
+	public String intToRoman(int num) {
+		String[][] table = new String[][] {
+				{ "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX" },
+				{ "X", "XX", "XXX", "XL", "L", "LX", "LXX", "LXXX", "XC" },
+				{ "C", "CC", "CCC", "CD", "D", "DC", "DCC", "DCCC", "CM" },
+				{ "M", "MM", "MMM", null, null, null, null, null, null } };
+		String digitString = null;
+		String result = new String();
+		int row = 0;
+		int digit = 0;
+		while (num > 0) {
+			digit = num % 10;
+			if (digit != 0) {
+				digitString = table[row][digit - 1];
+				result = digitString + result;
+			}
+			num /= 10;
+			row++;
+		}
+		return result;
+	}
+
+	// Insertion Sort List
+	public ListNode insertionSortList(ListNode head) {
+		ListNode start = head;
+		ListNode end = head;
+		while (end != null && end.next != null) {
+			ListNode node = end.next;
+			if (node.val < start.val) {
+				end.next = node.next;
+				node.next = start;
+				start = node;
+			} else {
+				ListNode scan = start;
+				while (scan != end && scan.next.val <= node.val) {
+					scan = scan.next;
+				}
+				if (scan != end) {
+					end.next = node.next;
+					node.next = scan.next;
+					scan.next = node;
+				} else {
+					end = end.next;
+				}
+			}
+		}
+		return start;
+	}
+
+	// Insert Interval
+	public ArrayList<Interval> insert(ArrayList<Interval> intervals,
+			Interval newInterval) {
+		int index1 = 0;
+		while (index1 < intervals.size()
+				&& intervals.get(index1).end < newInterval.start) {
+			index1++;
+		}
+		if (index1 == intervals.size()) {
+			intervals.add(newInterval);
+		} else {
+			int index2 = index1;
+			while (index2 < intervals.size()
+					&& intervals.get(index2).start <= newInterval.end) {
+				index2++;
+			}
+			index2--;
+			if (index2 < index1) {
+				intervals.add(index1, newInterval);
+			} else {
+				Interval update = intervals.get(index2);
+				int newStart = Math.min(intervals.get(index1).start,
+						newInterval.start);
+				int newEnd = Math.max(update.end, newInterval.end);
+				intervals.subList(index1, index2).clear();
+				update.start = newStart;
+				update.end = newEnd;
+			}
+		}
+		return intervals;
+	}
+
+	// LRU Cache
+	private class CacheNode {
+		private int key;
+		private int val;
+		private CacheNode prev;
+		private CacheNode next;
+
+		public CacheNode(int key, int val, CacheNode prev, CacheNode next) {
+			this.key = key;
+			this.val = val;
+			this.prev = prev;
+			this.next = next;
+		}
+	}
+
+	public class LRUCache {
+		private int capacity;
+		private int size;
+		private CacheNode head;
+		private CacheNode tail;
+		private HashMap<Integer, CacheNode> memo;
+
+		public LRUCache(int capacity) {
+			this.capacity = capacity;
+			this.size = 0;
+			this.head = new CacheNode(-1, -1, null, null);
+			this.tail = new CacheNode(-1, -1, this.head, null);
+			this.head.next = tail;
+			this.memo = new HashMap<Integer, CacheNode>();
+		}
+
+		public int get(int key) {
+			int val = -1;
+			if (memo.containsKey(key)) {
+				CacheNode cn = memo.get(key);
+				val = cn.val;
+				refresh(cn);
+			}
+			return val;
+		}
+
+		public void set(int key, int value) {
+			if (memo.containsKey(key)) {
+				CacheNode cn = memo.get(key);
+				cn.val = value;
+				refresh(cn);
+			} else {
+				if (size < capacity) {
+					CacheNode cn = new CacheNode(key, value, head, head.next);
+					head.next.prev = cn;
+					head.next = cn;
+					memo.put(key, cn);
+					size++;
+				} else {
+					memo.remove(tail.prev.key);
+					tail.prev.key = key;
+					memo.put(key, tail.prev);
+					tail.prev.val = value;
+					refresh(tail.prev);
+				}
+			}
+		}
+
+		private void refresh(CacheNode cn) {
+			cn.prev.next = cn.next;
+			cn.next.prev = cn.prev;
+			cn.next = head.next;
+			cn.prev = head;
+			head.next.prev = cn;
+			head.next = cn;
+		}
+	}
+
+	// Swap Nodes in Pairs
+	public ListNode swapPairs(ListNode head) {
+		if (head == null || head.next == null) {
+			return head;
+		}
+		ListNode finalHead = head.next;
+		ListNode prev = null;
+		ListNode node1 = head;
+		ListNode node2 = head.next;
+		ListNode post = node2.next;
+		while (node2 != null) {
+			node2.next = node1;
+			if (prev != null) {
+				prev.next = node2;
+			}
+			node1.next = post;
+			prev = node1;
+			node1 = post;
+			node2 = node1 == null ? null : node1.next;
+			post = node2 == null ? null : node2.next;
+		}
+		return finalHead;
 	}
 
 	public static void main(String[] args) {
