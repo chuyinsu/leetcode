@@ -52,6 +52,15 @@ public class Solution {
 		}
 	}
 
+	class RandomListNode {
+		int label;
+		RandomListNode next, random;
+
+		RandomListNode(int x) {
+			this.label = x;
+		}
+	}
+
 	// Single Number
 	public int singleNumber(int[] A) {
 		if (A == null) {
@@ -746,7 +755,7 @@ public class Solution {
 	}
 
 	// Word Break II
-	public ArrayList<String> wordBreak(String s, Set<String> dict) {
+	public ArrayList<String> wordBreakII(String s, Set<String> dict) {
 		HashMap<String, ArrayList<String>> memo = new HashMap<String, ArrayList<String>>();
 		return wordBreakHelper(s, dict, 0, 0, memo);
 	}
@@ -1651,6 +1660,225 @@ public class Solution {
 			post = node2 == null ? null : node2.next;
 		}
 		return finalHead;
+	}
+
+	// 3Sum
+	public ArrayList<ArrayList<Integer>> threeSum(int[] num) {
+		ArrayList<ArrayList<Integer>> result = new ArrayList<ArrayList<Integer>>();
+		Arrays.sort(num);
+		for (int i = 0; i < num.length - 2; i++) {
+			if (i > 0 && num[i] == num[i - 1]) {
+				continue;
+			}
+			int left = i + 1;
+			int right = num.length - 1;
+			int target = -num[i];
+			while (left < right) {
+				int sum = num[left] + num[right];
+				if (sum == target) {
+					ArrayList<Integer> found = new ArrayList<Integer>();
+					found.add(num[i]);
+					found.add(num[left]);
+					found.add(num[right]);
+					result.add(found);
+					do {
+						left++;
+					} while (left < num.length && num[left] == num[left - 1]);
+					do {
+						right--;
+					} while (right >= 0 && num[right] == num[right + 1]);
+				} else if (sum > target) {
+					right--;
+				} else {
+					left++;
+				}
+			}
+		}
+		return result;
+	}
+
+	// Copy List with Random Pointer
+	public RandomListNode copyRandomList(RandomListNode head) {
+		HashMap<RandomListNode, RandomListNode> memo = new HashMap<RandomListNode, RandomListNode>();
+		RandomListNode copyHead = null;
+		RandomListNode copyTail = null;
+		RandomListNode iter = head;
+		while (iter != null) {
+			if (copyTail == null) {
+				copyTail = new RandomListNode(iter.label);
+				copyHead = copyTail;
+			} else {
+				copyTail.next = new RandomListNode(iter.label);
+				copyTail = copyTail.next;
+			}
+			memo.put(iter, copyTail);
+			iter = iter.next;
+		}
+		iter = head;
+		RandomListNode copyIter = copyHead;
+		while (iter != null) {
+			if (iter.random == null) {
+				copyIter.random = null;
+			} else {
+				copyIter.random = memo.get(iter.random);
+			}
+			iter = iter.next;
+			copyIter = copyIter.next;
+		}
+		return copyHead;
+	}
+
+	public RandomListNode copyRandomListInPlace(RandomListNode head) {
+		if (head == null) {
+			return null;
+		}
+		RandomListNode curr = head;
+		RandomListNode post = head.next;
+		while (curr != null) {
+			curr.next = new RandomListNode(curr.label);
+			curr.next.next = post;
+			curr = post;
+			post = (post == null) ? null : post.next;
+		}
+		RandomListNode iter = head;
+		RandomListNode copyIter = head.next;
+		while (iter != null) {
+			if (iter.random == null) {
+				copyIter.random = null;
+			} else {
+				copyIter.random = iter.random.next;
+			}
+			iter = iter.next.next;
+			copyIter = (copyIter.next == null) ? null : copyIter.next.next;
+		}
+		RandomListNode tail = head;
+		RandomListNode copyHead = head.next;
+		RandomListNode copyTail = head.next;
+		while (tail != null) {
+			tail.next = copyTail.next;
+			copyTail.next = (copyTail.next == null) ? null : copyTail.next.next;
+			tail = tail.next;
+			copyTail = copyTail.next;
+		}
+		return copyHead;
+	}
+
+	// Remove Nth Node From End of List
+	public ListNode removeNthFromEnd(ListNode head, int n) {
+		if (head == null) {
+			return null;
+		}
+		ListNode iter1 = head;
+		ListNode iter2 = head;
+		for (int i = 0; i < n; i++) {
+			iter2 = iter2.next;
+		}
+		if (iter2 == null) {
+			ListNode ret = head.next;
+			head.next = null;
+			return ret;
+		}
+		while (iter2.next != null) {
+			iter1 = iter1.next;
+			iter2 = iter2.next;
+		}
+		iter1.next = iter1.next.next;
+		return head;
+	}
+
+	// Word Break
+	public boolean wordBreak(String s, Set<String> dict) {
+		boolean[] memo = new boolean[s.length() + 1];
+		Arrays.fill(memo, false);
+		memo[s.length()] = true;
+		int end = s.length() - 1;
+		for (int start = end; start >= 0; start--) {
+			for (int i = 1; i <= end - start + 1; i++) {
+				if (dict.contains(s.substring(start, start + i))
+						&& memo[start + i]) {
+					memo[start] = true;
+				}
+			}
+		}
+		return memo[0];
+	}
+
+	// Gray Code
+	public ArrayList<Integer> grayCode(int n) {
+		ArrayList<Integer> result = new ArrayList<Integer>();
+		if (n < 0) {
+			return result;
+		}
+		result.add(0);
+		if (n == 0) {
+			return result;
+		}
+		result.add(1);
+		if (n == 1) {
+			return result;
+		}
+		for (int i = 1; i < n; i++) {
+			int len = result.size();
+			for (int j = len - 1; j >= 0; j--) {
+				result.add(result.get(j) + (int) Math.pow(2, i));
+			}
+		}
+		return result;
+	}
+
+	// Search in Rotated Sorted Array
+	public int search(int[] A, int target) {
+		int left = 0;
+		int right = A.length - 1;
+		while (left <= right) {
+			int mid = left + (right - left) / 2;
+			if (A[mid] == target) {
+				return mid;
+			} else if (A[left] <= A[mid]) {
+				if (A[left] <= target && A[mid] > target) {
+					right = mid - 1;
+				} else {
+					left = mid + 1;
+				}
+			} else if (A[mid] <= A[right]) {
+				if (A[mid] < target && A[right] >= target) {
+					left = mid + 1;
+				} else {
+					right = mid - 1;
+				}
+			}
+		}
+		return -1;
+	}
+
+	// Search in Rotated Sorted Array II
+	public boolean searchII(int[] A, int target) {
+		return searchHelper(A, target, 0, A.length - 1);
+	}
+
+	private boolean searchHelper(int[] A, int target, int left, int right) {
+		if (left > right) {
+			return false;
+		}
+		int mid = left + (right - left) / 2;
+		if (A[mid] == target) {
+			return true;
+		} else if (A[left] == A[mid] && A[mid] == A[right]) {
+			return searchHelper(A, target, left, mid - 1)
+					|| searchHelper(A, target, mid + 1, right);
+		} else if (A[left] <= A[mid]) {
+			if (A[left] <= target && A[mid] > target) {
+				return searchHelper(A, target, left, mid - 1);
+			} else {
+				return searchHelper(A, target, mid + 1, right);
+			}
+		} else {
+			if (A[mid] < target && A[right] >= target) {
+				return searchHelper(A, target, mid + 1, right);
+			} else {
+				return searchHelper(A, target, left, mid - 1);
+			}
+		}
 	}
 
 	public static void main(String[] args) {
