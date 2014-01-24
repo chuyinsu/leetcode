@@ -61,6 +61,16 @@ public class Solution {
 		}
 	}
 
+	class UndirectedGraphNode {
+		int label;
+		ArrayList<UndirectedGraphNode> neighbors;
+
+		UndirectedGraphNode(int x) {
+			label = x;
+			neighbors = new ArrayList<UndirectedGraphNode>();
+		}
+	}
+
 	// Single Number
 	public int singleNumber(int[] A) {
 		if (A == null) {
@@ -1879,6 +1889,382 @@ public class Solution {
 				return searchHelper(A, target, left, mid - 1);
 			}
 		}
+	}
+
+	// Binary Tree Level Order Traversal
+	public ArrayList<ArrayList<Integer>> levelOrder(TreeNode root) {
+		ArrayList<ArrayList<Integer>> result = new ArrayList<ArrayList<Integer>>();
+		if (root == null) {
+			return result;
+		}
+		Queue<TreeNode> queue = new ArrayDeque<TreeNode>();
+		queue.offer(root);
+		int levelNum = 1;
+		while (!queue.isEmpty()) {
+			ArrayList<Integer> level = new ArrayList<Integer>();
+			for (int i = 0; i < levelNum; i++) {
+				TreeNode node = queue.poll();
+				if (node.left != null) {
+					queue.offer(node.left);
+				}
+				if (node.right != null) {
+					queue.offer(node.right);
+				}
+				level.add(node.val);
+			}
+			result.add(level);
+			levelNum = queue.size();
+		}
+		return result;
+	}
+
+	// Partition List
+	public ListNode partition(ListNode head, int x) {
+		ListNode smallHead = head;
+		ListNode smallTail = null;
+		ListNode bigHead = null;
+		ListNode bigTail = null;
+		while (head != null) {
+			if (head.val < x) {
+				if (smallTail == null) {
+					smallTail = head;
+					smallHead = head;
+				} else {
+					smallTail.next = head;
+					smallTail = smallTail.next;
+				}
+			} else {
+				if (bigTail == null) {
+					bigTail = head;
+					bigHead = head;
+				} else {
+					bigTail.next = head;
+					bigTail = bigTail.next;
+				}
+			}
+			head = head.next;
+		}
+		if (smallTail != null) {
+			smallTail.next = bigHead;
+		}
+		if (bigTail != null) {
+			bigTail.next = null;
+		}
+		return smallHead;
+	}
+
+	// Flatten Binary Tree to Linked List
+	public void flatten(TreeNode root) {
+		flattenHelper(root);
+	}
+
+	TreeNode[] flattenHelper(TreeNode root) {
+		if (root == null) {
+			return null;
+		}
+		TreeNode[] leftSide = flattenHelper(root.left);
+		TreeNode[] rightSide = flattenHelper(root.right);
+		TreeNode end = root;
+		end.left = null;
+		end.right = null;
+		if (leftSide != null) {
+			end.right = leftSide[0];
+			end = leftSide[1];
+		}
+		if (rightSide != null) {
+			end.right = rightSide[0];
+			end = rightSide[1];
+		}
+		return new TreeNode[] { root, end };
+	}
+
+	// Edit Distance
+	public int minDistance(String word1, String word2) {
+		if (word1 == null || word2 == null) {
+			return -1;
+		}
+		int[][] memo = new int[word1.length() + 1][word2.length() + 1];
+		for (int i = 0; i < memo.length; i++) {
+			memo[i][0] = i;
+		}
+		for (int j = 0; j < memo[0].length; j++) {
+			memo[0][j] = j;
+		}
+		for (int i = 1; i < memo.length; i++) {
+			for (int j = 1; j < memo[i].length; j++) {
+				if (word1.charAt(i - 1) == word2.charAt(j - 1)) {
+					memo[i][j] = memo[i - 1][j - 1];
+				} else {
+					int min = Math.min(
+							Math.min(memo[i][j - 1], memo[i - 1][j]),
+							memo[i - 1][j - 1]);
+					memo[i][j] = min + 1;
+				}
+			}
+		}
+		return memo[memo.length - 1][memo[0].length - 1];
+	}
+
+	// Implement strStr()
+	public String strStr(String haystack, String needle) {
+		if (haystack == null || needle == null) {
+			return null;
+		}
+		if (needle.isEmpty()) {
+			return haystack;
+		}
+		int start = 0;
+		int end = haystack.length() - needle.length();
+		while (start <= end) {
+			int nextStart = -1;
+			if (haystack.charAt(start) == needle.charAt(0)) {
+				int index = 1;
+				while (index < needle.length()
+						&& haystack.charAt(start + index) == needle
+								.charAt(index)) {
+					if (nextStart == -1
+							&& haystack.charAt(start + index) == needle
+									.charAt(0)) {
+						nextStart = start + index;
+					}
+					index++;
+				}
+				if (index == needle.length()) {
+					return haystack.substring(start, haystack.length());
+				}
+			}
+			if (nextStart != -1) {
+				start = nextStart;
+			} else {
+				start++;
+			}
+		}
+		return null;
+	}
+
+	// Distinct Subsequences
+	public int numDistinct(String S, String T) {
+		if (S == null || T == null || S.length() < T.length()) {
+			return 0;
+		}
+		int[][] memo = new int[S.length() + 1][T.length() + 1];
+		for (int i = 0; i < memo.length; i++) {
+			memo[i][0] = 1;
+		}
+		for (int j = 1; j < memo[0].length; j++) {
+			memo[0][j] = 0;
+		}
+		for (int i = 1; i < memo.length; i++) {
+			for (int j = 1; j <= Math.min(i, T.length()); j++) {
+				if (S.charAt(i - 1) == T.charAt(j - 1)) {
+					memo[i][j] = memo[i - 1][j] + memo[i - 1][j - 1];
+				} else {
+					memo[i][j] = memo[i - 1][j];
+				}
+			}
+		}
+		return memo[memo.length - 1][memo[0].length - 1];
+	}
+
+	// Roman to Integer
+	public int romanToInt(String s) {
+		if (s == null || s.isEmpty()) {
+			return 0;
+		}
+		HashMap<Character, Integer> table = new HashMap<Character, Integer>();
+		table.put('I', 1);
+		table.put('V', 5);
+		table.put('X', 10);
+		table.put('L', 50);
+		table.put('C', 100);
+		table.put('D', 500);
+		table.put('M', 1000);
+		int prev = Integer.MIN_VALUE;
+		int result = 0;
+		for (int i = s.length() - 1; i >= 0; i--) {
+			char c = s.charAt(i);
+			if (!table.containsKey(c)) {
+				return 0;
+			}
+			int value = table.get(c);
+			if (value < prev) {
+				result -= value;
+			} else {
+				result += value;
+			}
+			prev = value;
+		}
+		return result;
+	}
+
+	// Clone Graph
+	public UndirectedGraphNode cloneGraph(UndirectedGraphNode node) {
+		if (node == null) {
+			return null;
+		}
+		HashMap<UndirectedGraphNode, UndirectedGraphNode> cloned = new HashMap<UndirectedGraphNode, UndirectedGraphNode>();
+		return cloneGraphHelper(node, cloned);
+	}
+
+	private UndirectedGraphNode cloneGraphHelper(UndirectedGraphNode node,
+			HashMap<UndirectedGraphNode, UndirectedGraphNode> cloned) {
+		if (cloned.containsKey(node)) {
+			return cloned.get(node);
+		}
+		UndirectedGraphNode newNode = new UndirectedGraphNode(node.label);
+		cloned.put(node, newNode);
+		for (UndirectedGraphNode ugn : node.neighbors) {
+			newNode.neighbors.add(cloneGraphHelper(ugn, cloned));
+		}
+		return newNode;
+	}
+
+	// Wildcard Matching
+	public boolean isMatchWildcard(String s, String p) {
+		if (s == null || p == null) {
+			return false;
+		}
+		int notStar = 0;
+		for (int i = 0; i < p.length(); i++) {
+			if (p.charAt(i) != '*') {
+				notStar++;
+			}
+		}
+		if (notStar > s.length()) {
+			return false;
+		}
+		boolean[][] memo = new boolean[s.length() + 1][p.length() + 1];
+		memo[s.length()][p.length()] = true;
+		for (int i = s.length() - 1; i >= 0; i--) {
+			memo[i][p.length()] = false;
+		}
+		boolean allStar = true;
+		for (int j = p.length() - 1; j >= 0; j--) {
+			if (allStar && p.charAt(j) != '*') {
+				allStar = false;
+			}
+			memo[s.length()][j] = allStar;
+		}
+		for (int i = s.length() - 1; i >= 0; i--) {
+			for (int j = p.length() - 1; j >= 0; j--) {
+				if (p.charAt(j) == '?') {
+					memo[i][j] = memo[i + 1][j + 1];
+				} else if (p.charAt(j) == '*') {
+					memo[i][j] = false;
+					for (int k = i; k < memo.length; k++) {
+						if (memo[k][j + 1]) {
+							memo[i][j] = true;
+							break;
+						}
+					}
+				} else if (p.charAt(j) == s.charAt(i)) {
+					memo[i][j] = memo[i + 1][j + 1];
+				} else {
+					memo[i][j] = false;
+				}
+			}
+		}
+		return memo[0][0];
+	}
+
+	// N-Queens II
+	public int totalNQueens(int n) {
+		int[] memo = new int[n];
+		Arrays.fill(memo, 0);
+		return totalNQueensHelper(memo, 0);
+	}
+
+	private int totalNQueensHelper(int[] memo, int row) {
+		if (row == memo.length) {
+			return 1;
+		}
+		int result = 0;
+		for (int i = 0; i < memo.length; i++) {
+			memo[row] = i;
+			if (valid(memo, row)) {
+				result += totalNQueensHelper(memo, row + 1);
+			}
+		}
+		return result;
+	}
+
+	// Validate Binary Search Tree
+	public boolean isValidBST(TreeNode root) {
+		return isValidBSTHelper(root, Integer.MIN_VALUE, Integer.MAX_VALUE);
+	}
+
+	private boolean isValidBSTHelper(TreeNode root, int min, int max) {
+		if (root == null) {
+			return true;
+		} else if (root.val <= min || root.val >= max) {
+			return false;
+		} else {
+			return isValidBSTHelper(root.left, min, root.val)
+					&& isValidBSTHelper(root.right, root.val, max);
+		}
+	}
+
+	// Climbing Stairs
+	public int climbStairs(int n) {
+		if (n < 0) {
+			return 0;
+		}
+		if (n <= 1) {
+			return 1;
+		}
+		int prevPrev = 1;
+		int prev = 1;
+		int curr = 0;
+		for (int i = 2; i <= n; i++) {
+			curr = prev + prevPrev;
+			prevPrev = prev;
+			prev = curr;
+		}
+		return curr;
+	}
+
+	// Subsets
+	public ArrayList<ArrayList<Integer>> subsets(int[] S) {
+		ArrayList<ArrayList<Integer>> result = new ArrayList<ArrayList<Integer>>();
+		if (S == null) {
+			return result;
+		}
+		ArrayList<Integer> empty = new ArrayList<Integer>();
+		result.add(empty);
+		if (S.length == 0) {
+			return result;
+		}
+		Arrays.sort(S);
+		for (int i = 0; i < S.length; i++) {
+			ArrayList<Integer> set = new ArrayList<Integer>();
+			set.add(S[i]);
+			result.add(set);
+		}
+		int start = 1;
+		int end = result.size();
+		for (int i = 1; i < S.length; i++) {
+			int len = 0;
+			for (int j = start; j < end; j++) {
+				ArrayList<Integer> set = result.get(j);
+				int last = set.size() - 1;
+				for (int k = S.length - 1; k >= 0; k--) {
+					if (S[k] > set.get(last)) {
+						ArrayList<Integer> newSet = new ArrayList<Integer>(set);
+						newSet.add(S[k]);
+						result.add(newSet);
+						len++;
+					} else {
+						break;
+					}
+				}
+			}
+			start = end;
+			end = start + len;
+			if (start >= result.size()) {
+				break;
+			}
+		}
+		return result;
 	}
 
 	public static void main(String[] args) {
