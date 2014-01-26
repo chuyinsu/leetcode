@@ -2267,6 +2267,188 @@ public class Solution {
 		return result;
 	}
 
+	// Maximal Rectangle
+	public int maximalRectangle(char[][] matrix) {
+		if (matrix == null || matrix.length == 0 || matrix[0].length == 0) {
+			return 0;
+		}
+		int[][] memo = new int[matrix.length][matrix[0].length];
+		for (int i = 0; i < memo.length; i++) {
+			for (int j = 0; j < memo[i].length; j++) {
+				memo[i][j] = (i == 0) ? (matrix[i][j] - '0')
+						: (matrix[i][j] - '0' + memo[i - 1][j]);
+			}
+		}
+		int max = 0;
+		for (int row1 = 0; row1 < matrix.length; row1++) {
+			for (int row2 = row1; row2 < matrix.length; row2++) {
+				int len = row2 - row1 + 1;
+				int col = 0;
+				while (col < matrix[0].length) {
+					int colVal = (row1 == 0) ? (memo[row2][col])
+							: (memo[row2][col] - memo[row1 - 1][col]);
+					int nextCol = col + 1;
+					if (colVal == len) {
+						while (nextCol < matrix[0].length) {
+							int nextColVal = (row1 == 0) ? (memo[row2][nextCol])
+									: (memo[row2][nextCol] - memo[row1 - 1][nextCol]);
+							if (nextColVal == len) {
+								nextCol++;
+							} else {
+								break;
+							}
+						}
+						max = Math.max(max, (nextCol - col) * len);
+					}
+					col = nextCol;
+				}
+			}
+		}
+		return max;
+	}
+
+	// Generate Parentheses
+	public ArrayList<String> generateParenthesis(int n) {
+		StringBuffer sb = new StringBuffer();
+		ArrayList<String> result = new ArrayList<String>();
+		generateParenthesisHelper(n, n, sb, result);
+		return result;
+	}
+
+	private void generateParenthesisHelper(int left, int right,
+			StringBuffer sb, ArrayList<String> result) {
+		if (left == 0 && right == 0) {
+			result.add(sb.toString());
+			return;
+		} else {
+			if (left < right) {
+				generateParenthesisHelper(left, right - 1, sb.append(")"),
+						result);
+				sb.deleteCharAt(sb.length() - 1);
+			}
+			if (left > 0) {
+				generateParenthesisHelper(left - 1, right, sb.append("("),
+						result);
+				sb.deleteCharAt(sb.length() - 1);
+			}
+		}
+	}
+
+	// Valid Palindrome
+	public boolean isPalindrome(String s) {
+		if (s == null) {
+			return false;
+		}
+		int left = 0;
+		int right = s.length() - 1;
+		while (left < right) {
+			while (left < right
+					&& !Character.isLetterOrDigit(Character.toLowerCase(s
+							.charAt(left)))) {
+				left++;
+			}
+			while (left < right
+					&& !Character.isLetterOrDigit(Character.toLowerCase(s
+							.charAt(right)))) {
+				right--;
+			}
+			if (left < right) {
+				if (Character.toLowerCase(s.charAt(left)) == Character
+						.toLowerCase(s.charAt(right))) {
+					left++;
+					right--;
+				} else {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	// Search a 2D Matrix
+	public boolean searchMatrix(int[][] matrix, int target) {
+		if (matrix == null || matrix.length == 0 || matrix[0].length == 0) {
+			return false;
+		}
+		int left = 0;
+		int right = matrix.length * matrix[0].length - 1;
+		while (left <= right) {
+			int mid = left + (right - left) / 2;
+			int row = mid / matrix[0].length;
+			int col = mid % matrix[0].length;
+			if (matrix[row][col] == target) {
+				return true;
+			} else if (matrix[row][col] > target) {
+				right = mid - 1;
+			} else {
+				left = mid + 1;
+			}
+		}
+		return false;
+	}
+
+	// Plus One
+	public int[] plusOne(int[] digits) {
+		if (digits == null || digits.length == 0) {
+			int[] result = new int[1];
+			result[0] = 1;
+			return result;
+		}
+		int index = digits.length - 1;
+		while (index >= 0 && digits[index] == 9) {
+			index--;
+		}
+		if (index < 0) {
+			int[] result = new int[digits.length + 1];
+			Arrays.fill(result, 0);
+			result[0] = 1;
+			return result;
+		} else {
+			digits[index] += 1;
+			for (int i = index + 1; i < digits.length; i++) {
+				digits[i] = 0;
+			}
+		}
+		return digits;
+	}
+
+	// Longest Palindromic Substring
+	public String longestPalindrome(String s) {
+		if (s == null || s.isEmpty()) {
+			return null;
+		}
+		int start = 0;
+		int end = 0;
+		boolean[][] memo = new boolean[s.length()][s.length()];
+		for (int i = 0; i < memo.length; i++) {
+			memo[i][i] = true;
+		}
+		for (int i = 0; i < memo.length - 1; i++) {
+			if (s.charAt(i) == s.charAt(i + 1)) {
+				memo[i][i + 1] = true;
+				start = i;
+				end = i + 1;
+			} else {
+				memo[i][i + 1] = false;
+			}
+		}
+		for (int len = 3; len <= s.length(); len++) {
+			for (int row = 0; row <= s.length() - len; row++) {
+				int col = row + len - 1;
+				if (s.charAt(row) == s.charAt(col)) {
+					memo[row][col] = memo[row + 1][col - 1];
+					if (memo[row][col] && (len > end - start + 1)) {
+						start = row;
+						end = col;
+					}
+				} else {
+					memo[row][col] = false;
+				}
+			}
+		}
+		return s.substring(start, end + 1);
+	}
+
 	public static void main(String[] args) {
 		// Solution s = new Solution();
 	}
