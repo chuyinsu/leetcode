@@ -1,6 +1,8 @@
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Queue;
@@ -426,7 +428,7 @@ public class Solution {
 	}
 
 	// Best Time to Buy and Sell Stock III
-	public int maxProfit(int[] prices) {
+	public int maxProfitIII(int[] prices) {
 		if (prices == null || prices.length == 0) {
 			return 0;
 		}
@@ -519,7 +521,8 @@ public class Solution {
 	}
 
 	// Median of Two Sorted Arrays
-	public double findMedianSortedArrays(int A[], int B[]) {
+	// Always look at the "right" position
+	public double findMedianSortedArraysRight(int A[], int B[]) {
 		return findMedianSortedArraysHelper(A, B,
 				Math.max(0, (A.length - B.length) / 2),
 				Math.min(A.length - 1, (A.length + B.length) / 2));
@@ -545,10 +548,47 @@ public class Solution {
 				return (A[mid] + Math.max(prevA, prevB)) / 2D;
 			}
 		}
-		if (compare <= 0 || A[mid] > B[compare - 1]) {
+		if (compare < 0
+				|| (compare >= 0 && compare < B.length && A[mid] > B[compare])) {
 			return findMedianSortedArraysHelper(A, B, left, mid - 1);
 		} else {
 			return findMedianSortedArraysHelper(A, B, mid + 1, right);
+		}
+	}
+
+	// Median of Two Sorted Arrays
+	// Always look at the "left" position
+	public double findMedianSortedArraysLeft(int A[], int B[]) {
+		return findMedianSortedArrays(A, B,
+				Math.max(0, (A.length - B.length - 1) / 2),
+				Math.min(A.length - 1, (A.length + B.length - 1) / 2));
+	}
+
+	private double findMedianSortedArrays(int[] A, int[] B, int left, int right) {
+		if (left > right) {
+			return findMedianSortedArrays(B, A,
+					Math.max(0, (B.length - A.length - 1) / 2),
+					Math.min(B.length - 1, (A.length + B.length - 1) / 2));
+		}
+		int mid = left + (right - left) / 2;
+		int compare = (A.length + B.length - 1) / 2 - mid;
+		if ((compare == 0 || A[mid] >= B[compare - 1])
+				&& (compare == B.length || A[mid] <= B[compare])) {
+			if ((A.length + B.length) % 2 != 0) {
+				return A[mid];
+			} else {
+				int postA = mid == A.length - 1 ? Integer.MAX_VALUE
+						: A[mid + 1];
+				int postB = compare == B.length ? Integer.MAX_VALUE
+						: B[compare];
+				return (A[mid] + Math.min(postA, postB)) / 2D;
+			}
+		}
+		if (compare < 0
+				|| (compare >= 0 && compare < B.length && A[mid] > B[compare])) {
+			return findMedianSortedArrays(A, B, left, mid - 1);
+		} else {
+			return findMedianSortedArrays(A, B, mid + 1, right);
 		}
 	}
 
@@ -1131,6 +1171,7 @@ public class Solution {
 		return result;
 	}
 
+	// Median of Two Sorted Arrays of Equal Length
 	public double findMedianSortedArraysEqualLength(int A[], int B[]) {
 		if (A == null || B == null || A.length == 0 || B.length == 0
 				|| A.length != B.length) {
@@ -2447,6 +2488,175 @@ public class Solution {
 			}
 		}
 		return s.substring(start, end + 1);
+	}
+
+	// Container With Most Water
+	public int maxArea(int[] height) {
+		int left = 0;
+		int right = height.length - 1;
+		int max = 0;
+		while (left < right) {
+			int vol = Math.min(height[left], height[right]) * (right - left);
+			max = Math.max(max, vol);
+			if (height[left] < height[right]) {
+				left++;
+			} else {
+				right--;
+			}
+		}
+		return max;
+	}
+
+	// Spiral Matrix
+	public ArrayList<Integer> spiralOrder(int[][] matrix) {
+		ArrayList<Integer> result = new ArrayList<Integer>();
+		if (matrix == null || matrix.length == 0 || matrix[0].length == 0) {
+			return result;
+		}
+		int m = matrix.length;
+		int n = matrix[0].length;
+		for (int i = 0; i <= Math.min((n - 1) / 2, (m - 1) / 2); i++) {
+			int row1 = i;
+			int col1 = i;
+			int row2 = m - i - 1;
+			int col2 = n - i - 1;
+			if (row1 == row2) {
+				for (int col = col1; col <= col2; col++) {
+					result.add(matrix[row1][col]);
+				}
+			} else if (col1 == col2) {
+				for (int row = row1; row <= row2; row++) {
+					result.add(matrix[row][col1]);
+				}
+			} else {
+				for (int col = col1; col <= col2; col++) {
+					result.add(matrix[row1][col]);
+				}
+				for (int row = row1 + 1; row <= row2; row++) {
+					result.add(matrix[row][col2]);
+				}
+				for (int col = col2 - 1; col >= col1; col--) {
+					result.add(matrix[row2][col]);
+				}
+				for (int row = row2 - 1; row > row1; row--) {
+					result.add(matrix[row][col1]);
+				}
+			}
+		}
+		return result;
+	}
+
+	// Maximum Depth of Binary Tree
+	public int maxDepth(TreeNode root) {
+		if (root == null) {
+			return 0;
+		}
+		return Math.max(maxDepth(root.left), maxDepth(root.right)) + 1;
+	}
+
+	// Search Insert Position
+	public int searchInsert(int[] A, int target) {
+		int left = 0;
+		int right = A.length - 1;
+		int mid = 0;
+		while (left <= right) {
+			mid = left + (right - left) / 2;
+			if (A[mid] == target) {
+				return mid;
+			} else if (A[mid] < target) {
+				left = mid + 1;
+			} else {
+				right = mid - 1;
+			}
+		}
+		if (A[mid] < target) {
+			return mid + 1;
+		} else {
+			return mid;
+		}
+	}
+
+	// Best Time to Buy and Sell Stock
+	public int maxProfit(int[] prices) {
+		if (prices == null || prices.length < 2) {
+			return 0;
+		}
+		int maxPrice = prices[prices.length - 1];
+		int maxProfit = 0;
+		for (int i = prices.length - 2; i >= 0; i--) {
+			maxProfit = Math.max(maxProfit, maxPrice - prices[i]);
+			maxPrice = Math.max(maxPrice, prices[i]);
+		}
+		return maxProfit;
+	}
+
+	// Merge Intervals
+	public ArrayList<Interval> merge(ArrayList<Interval> intervals) {
+		if (intervals == null || intervals.size() < 2) {
+			return intervals;
+		}
+		Collections.sort(intervals, new Comparator<Interval>() {
+			public int compare(Interval i1, Interval i2) {
+				return i1.start - i2.start;
+			}
+		});
+		int index = 0;
+		while (index < intervals.size()) {
+			int toMerge = index + 1;
+			int maxEnd = intervals.get(index).end;
+			while (toMerge < intervals.size()
+					&& intervals.get(index).end >= intervals.get(toMerge).start) {
+				maxEnd = Math.max(maxEnd, intervals.get(toMerge).end);
+				toMerge++;
+			}
+			if (toMerge > index + 1) {
+				intervals.get(index).end = maxEnd;
+				intervals.subList(index + 1, toMerge).clear();
+			} else {
+				index++;
+			}
+		}
+		return intervals;
+	}
+
+	// Merge Intervals
+	// Another solution is to merge one by one
+	public ArrayList<Interval> mergeOneByOne(ArrayList<Interval> intervals) {
+		Collections.sort(intervals, new Comparator<Interval>() {
+			public int compare(Interval i1, Interval i2) {
+				return i1.start - i2.start;
+			}
+		});
+		int index = 0;
+		while (index < intervals.size() - 1) {
+			Interval i1 = intervals.get(index);
+			Interval i2 = intervals.get(index + 1);
+			if (i1.end >= i2.start) {
+				i1.end = Math.max(i1.end, i2.end);
+				intervals.remove(index + 1);
+			} else {
+				index++;
+			}
+		}
+		return intervals;
+	}
+
+	// Balanced Binary Tree
+	public boolean isBalanced(TreeNode root) {
+		return isBalancedHelper(root) != -1;
+	}
+
+	private int isBalancedHelper(TreeNode root) {
+		if (root == null) {
+			return 0;
+		}
+		int left = isBalancedHelper(root.left);
+		int right = isBalancedHelper(root.right);
+		if (left == -1 || right == -1 || Math.abs(left - right) > 1) {
+			return -1;
+		} else {
+			return Math.max(left, right) + 1;
+		}
 	}
 
 	public static void main(String[] args) {
