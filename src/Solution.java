@@ -1252,6 +1252,7 @@ public class Solution {
 	}
 
 	// Path Sum
+	// Recursive solution
 	public boolean hasPathSum(TreeNode root, int sum) {
 		if (root == null) {
 			return false;
@@ -1263,7 +1264,39 @@ public class Solution {
 		}
 	}
 
+	// Path Sum
+	// Iterative solution
+	public boolean hasPathSumIter(TreeNode root, int sum) {
+		Stack<TreeNode> stack = new Stack<TreeNode>();
+		int accu = 0;
+		while (root != null) {
+			while (root != null) {
+				stack.push(root);
+				accu += root.val;
+				root = root.left != null ? root.left : root.right;
+			}
+			if (accu == sum) {
+				return true;
+			}
+			TreeNode child = null;
+			root = stack.peek();
+			while (!stack.isEmpty() && root != null
+					&& (root.right == null || root.right == child)) {
+				child = stack.pop();
+				accu -= child.val;
+				if (!stack.isEmpty()) {
+					root = stack.peek();
+				} else {
+					root = null;
+				}
+			}
+			root = root == null ? null : root.right;
+		}
+		return false;
+	}
+
 	// Binary Tree Inorder Traversal
+	// Pop root immediately after been traversed
 	public ArrayList<Integer> inorderTraversal(TreeNode root) {
 		ArrayList<Integer> result = new ArrayList<Integer>();
 		Stack<TreeNode> stack = new Stack<TreeNode>();
@@ -1279,6 +1312,43 @@ public class Solution {
 				result.add(root.val);
 			}
 			root = root.right;
+		}
+		return result;
+	}
+
+	// Binary Tree Inorder Traversal
+	// Same stack with preorder and postorder traversal
+	public ArrayList<Integer> inorderTraversalTraditional(TreeNode root) {
+		ArrayList<Integer> result = new ArrayList<Integer>();
+		Stack<TreeNode> stack = new Stack<TreeNode>();
+		while (root != null) {
+			while (root != null) {
+				stack.push(root);
+				if (root.left != null) {
+					root = root.left;
+				} else {
+					result.add(root.val);
+					root = root.right;
+				}
+			}
+			TreeNode child = null;
+			root = stack.peek();
+			while (!stack.isEmpty() && root != null
+					&& (root.right == null || root.right == child)) {
+				if (root.right != child) {
+					result.add(root.val);
+				}
+				child = stack.pop();
+				if (!stack.isEmpty()) {
+					root = stack.peek();
+				} else {
+					root = null;
+				}
+			}
+			if (root != null) {
+				result.add(root.val);
+				root = root.right;
+			}
 		}
 		return result;
 	}
@@ -2277,32 +2347,11 @@ public class Solution {
 		}
 		Arrays.sort(S);
 		for (int i = 0; i < S.length; i++) {
-			ArrayList<Integer> set = new ArrayList<Integer>();
-			set.add(S[i]);
-			result.add(set);
-		}
-		int start = 1;
-		int end = result.size();
-		for (int i = 1; i < S.length; i++) {
-			int len = 0;
-			for (int j = start; j < end; j++) {
-				ArrayList<Integer> set = result.get(j);
-				int last = set.size() - 1;
-				for (int k = S.length - 1; k >= 0; k--) {
-					if (S[k] > set.get(last)) {
-						ArrayList<Integer> newSet = new ArrayList<Integer>(set);
-						newSet.add(S[k]);
-						result.add(newSet);
-						len++;
-					} else {
-						break;
-					}
-				}
-			}
-			start = end;
-			end = start + len;
-			if (start >= result.size()) {
-				break;
+			int size = result.size();
+			for (int j = 0; j < size; j++) {
+				ArrayList<Integer> al = new ArrayList<Integer>(result.get(j));
+				al.add(S[i]);
+				result.add(al);
 			}
 		}
 		return result;
@@ -2547,11 +2596,42 @@ public class Solution {
 	}
 
 	// Maximum Depth of Binary Tree
+	// Recursive solution
 	public int maxDepth(TreeNode root) {
 		if (root == null) {
 			return 0;
 		}
 		return Math.max(maxDepth(root.left), maxDepth(root.right)) + 1;
+	}
+
+	// Maximum Depth of Binary Tree
+	// Iterative solution
+	public int maxDepthIter(TreeNode root) {
+		Stack<TreeNode> stack = new Stack<TreeNode>();
+		int depth = 0;
+		int max = 0;
+		while (root != null) {
+			while (root != null) {
+				stack.push(root);
+				depth++;
+				root = root.left != null ? root.left : root.right;
+			}
+			max = Math.max(max, depth);
+			TreeNode child = null;
+			root = stack.peek();
+			while (!stack.isEmpty() && root != null
+					&& (root.right == null || root.right == child)) {
+				child = stack.pop();
+				depth--;
+				if (!stack.isEmpty()) {
+					root = stack.peek();
+				} else {
+					root = null;
+				}
+			}
+			root = root == null ? null : root.right;
+		}
+		return max;
 	}
 
 	// Search Insert Position
@@ -2657,6 +2737,147 @@ public class Solution {
 		} else {
 			return Math.max(left, right) + 1;
 		}
+	}
+
+	// Path Sum II
+	// Recursive solution
+	public ArrayList<ArrayList<Integer>> pathSum(TreeNode root, int sum) {
+		ArrayList<ArrayList<Integer>> result = new ArrayList<ArrayList<Integer>>();
+		ArrayList<Integer> path = new ArrayList<Integer>();
+		pathSumHelper(root, sum, path, result);
+		return result;
+	}
+
+	// Path Sum II
+	// Iterative solution
+	public ArrayList<ArrayList<Integer>> pathSumIter(TreeNode root, int sum) {
+		ArrayList<ArrayList<Integer>> result = new ArrayList<ArrayList<Integer>>();
+		Stack<TreeNode> stack = new Stack<TreeNode>();
+		int accu = 0;
+		while (root != null) {
+			while (root != null) {
+				stack.push(root);
+				accu += root.val;
+				root = root.left != null ? root.left : root.right;
+			}
+			if (accu == sum) {
+				ArrayList<TreeNode> path = new ArrayList<TreeNode>(stack);
+				ArrayList<Integer> found = new ArrayList<Integer>();
+				for (TreeNode node : path) {
+					found.add(node.val);
+				}
+				result.add(found);
+			}
+			TreeNode child = null;
+			root = stack.peek();
+			while (!stack.isEmpty() && root != null
+					&& (root.right == null || root.right == child)) {
+				child = stack.pop();
+				accu -= child.val;
+				if (!stack.isEmpty()) {
+					root = stack.peek();
+				} else {
+					root = null;
+				}
+			}
+			root = root == null ? null : root.right;
+		}
+		return result;
+	}
+
+	private void pathSumHelper(TreeNode root, int sum, ArrayList<Integer> path,
+			ArrayList<ArrayList<Integer>> result) {
+		if (root == null) {
+			return;
+		}
+		path.add(root.val);
+		if (root.left == null && root.right == null && root.val == sum) {
+			ArrayList<Integer> found = new ArrayList<Integer>(path);
+			result.add(found);
+		} else {
+			pathSumHelper(root.left, sum - root.val, path, result);
+			pathSumHelper(root.right, sum - root.val, path, result);
+		}
+		path.remove(path.size() - 1);
+	}
+
+	// Binary Tree Preorder Traversal
+	public ArrayList<Integer> preorderTraversal(TreeNode root) {
+		ArrayList<Integer> result = new ArrayList<Integer>();
+		Stack<TreeNode> stack = new Stack<TreeNode>();
+		while (root != null) {
+			while (root != null) {
+				stack.push(root);
+				result.add(root.val);
+				root = root.left != null ? root.left : root.right;
+			}
+			TreeNode child = null;
+			root = stack.peek();
+			while (!stack.isEmpty() && root != null
+					&& (root.right == null || root.right == child)) {
+				child = stack.pop();
+				if (!stack.isEmpty()) {
+					root = stack.peek();
+				} else {
+					root = null;
+				}
+			}
+			root = root == null ? null : root.right;
+		}
+		return result;
+	}
+
+	// Binary Tree Postorder Traversal
+	public ArrayList<Integer> postorderTraversal(TreeNode root) {
+		ArrayList<Integer> result = new ArrayList<Integer>();
+		Stack<TreeNode> stack = new Stack<TreeNode>();
+		while (root != null) {
+			while (root != null) {
+				stack.push(root);
+				root = root.left != null ? root.left : root.right;
+			}
+			TreeNode child = null;
+			root = stack.peek();
+			while (!stack.isEmpty() && root != null
+					&& (root.right == null || root.right == child)) {
+				child = stack.pop();
+				result.add(child.val);
+				if (!stack.isEmpty()) {
+					root = stack.peek();
+				} else {
+					root = null;
+				}
+			}
+			root = root == null ? null : root.right;
+		}
+		return result;
+	}
+
+	// Subsets II
+	public ArrayList<ArrayList<Integer>> subsetsWithDup(int[] num) {
+		ArrayList<ArrayList<Integer>> result = new ArrayList<ArrayList<Integer>>();
+		if (num == null) {
+			return result;
+		}
+		ArrayList<Integer> empty = new ArrayList<Integer>();
+		result.add(empty);
+		if (num.length == 0) {
+			return result;
+		}
+		Arrays.sort(num);
+		int partialSize = 0;
+		for (int i = 0; i < num.length; i++) {
+			int start = (i == 0 || num[i] != num[i - 1]) ? 0 : result.size()
+					- partialSize;
+			int end = result.size() - 1;
+			for (int j = start; j <= end; j++) {
+				ArrayList<Integer> al = new ArrayList<Integer>(result.get(j));
+				al.add(num[i]);
+				result.add(al);
+			}
+			partialSize = end - start + 1;
+		}
+		return result;
 	}
 
 	public static void main(String[] args) {
