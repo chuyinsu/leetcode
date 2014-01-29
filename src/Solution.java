@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
 import java.util.Stack;
@@ -2878,6 +2879,146 @@ public class Solution {
 			partialSize = end - start + 1;
 		}
 		return result;
+	}
+
+	// Merge k Sorted Lists
+	public ListNode mergeKLists(ArrayList<ListNode> lists) {
+		if (lists == null || lists.size() == 0) {
+			return null;
+		}
+		PriorityQueue<ListNode> heap = new PriorityQueue<ListNode>(
+				lists.size(), new Comparator<ListNode>() {
+					public int compare(ListNode ln1, ListNode ln2) {
+						return ln1.val - ln2.val;
+					}
+				});
+		for (int i = 0; i < lists.size(); i++) {
+			if (lists.get(i) != null) {
+				heap.offer(lists.get(i));
+			}
+		}
+		ListNode head = null;
+		ListNode tail = null;
+		while (!heap.isEmpty()) {
+			ListNode node = heap.poll();
+			if (tail == null) {
+				tail = node;
+				head = node;
+			} else {
+				tail.next = node;
+				tail = node;
+			}
+			if (node.next != null) {
+				heap.offer(node.next);
+			}
+		}
+		return head;
+	}
+
+	// Permutations II
+	public ArrayList<ArrayList<Integer>> permuteUnique(int[] num) {
+		if (num == null || num.length == 0) {
+			return new ArrayList<ArrayList<Integer>>();
+		}
+		Queue<ArrayList<Integer>> queue = new ArrayDeque<ArrayList<Integer>>();
+		ArrayList<Integer> initial = new ArrayList<Integer>();
+		Arrays.sort(num);
+		initial.add(num[0]);
+		queue.offer(initial);
+		for (int i = 1; i < num.length; i++) {
+			int len = queue.size();
+			for (int j = 0; j < len; j++) {
+				ArrayList<Integer> al = queue.poll();
+				boolean stop = false;
+				for (int k = al.size(); k >= 0 && (!stop); k--) {
+					ArrayList<Integer> permutation = new ArrayList<Integer>(al);
+					permutation.add(k, num[i]);
+					queue.offer(permutation);
+					if (k > 0 && num[i] == al.get(k - 1).intValue()) {
+						stop = true;
+					}
+				}
+			}
+		}
+		return new ArrayList<ArrayList<Integer>>(queue);
+	}
+
+	// Linked List Cycle
+	public boolean hasCycle(ListNode head) {
+		ListNode fast = head;
+		ListNode slow = head;
+		while (fast != null && fast.next != null) {
+			slow = slow.next;
+			fast = fast.next.next;
+			if (slow == fast) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	// Sort List
+	// Recursive solution
+	public ListNode sortList(ListNode head) {
+		ListNode tail = head;
+		while (tail != null && tail.next != null) {
+			tail = tail.next;
+		}
+		return sortListHelper(head, tail);
+	}
+
+	private ListNode sortListHelper(ListNode head, ListNode tail) {
+		if (head == null || head == tail) {
+			return head;
+		}
+		ListNode prevSlow = null;
+		ListNode slow = head;
+		ListNode prevFast = null;
+		ListNode fast = head;
+		while (fast != tail && fast != tail.next) {
+			prevSlow = slow;
+			slow = slow.next;
+			fast = fast.next;
+			prevFast = fast;
+			fast = fast.next;
+		}
+		ListNode h1 = head;
+		ListNode t1 = prevSlow;
+		t1.next = null;
+		ListNode h2 = slow;
+		ListNode t2 = fast == null ? prevFast : fast;
+		t2.next = null;
+		h1 = sortListHelper(h1, t1);
+		h2 = sortListHelper(h2, t2);
+		ListNode finalHead = null;
+		ListNode finalTail = null;
+		while (h1 != null && h2 != null) {
+			if (h1.val < h2.val) {
+				if (finalTail == null) {
+					finalTail = h1;
+					finalHead = h1;
+				} else {
+					finalTail.next = h1;
+					finalTail = h1;
+				}
+				h1 = h1.next;
+			} else {
+				if (finalTail == null) {
+					finalTail = h2;
+					finalHead = h2;
+				} else {
+					finalTail.next = h2;
+					finalTail = h2;
+				}
+				h2 = h2.next;
+			}
+		}
+		if (h1 != null) {
+			finalTail.next = h1;
+		} else {
+			finalTail.next = h2;
+		}
+		return finalHead;
 	}
 
 	public static void main(String[] args) {
