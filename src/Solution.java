@@ -1318,6 +1318,22 @@ public class Solution {
 	}
 
 	// Binary Tree Inorder Traversal
+	// Simple version
+	public ArrayList<Integer> inorderTraversalSimple(TreeNode root) {
+		ArrayList<Integer> result = new ArrayList<Integer>();
+		Stack<TreeNode> stack = new Stack<TreeNode>();
+		while (!stack.isEmpty() || root != null) {
+			while (root != null) {
+				stack.push(root);
+				root = root.left;
+			}
+			result.add(stack.peek().val);
+			root = stack.pop().right;
+		}
+		return result;
+	}
+
+	// Binary Tree Inorder Traversal
 	// Same stack with preorder and postorder traversal
 	public ArrayList<Integer> inorderTraversalTraditional(TreeNode root) {
 		ArrayList<Integer> result = new ArrayList<Integer>();
@@ -1915,9 +1931,8 @@ public class Solution {
 		memo[s.length()] = true;
 		int end = s.length() - 1;
 		for (int start = end; start >= 0; start--) {
-			for (int i = 1; i <= end - start + 1; i++) {
-				if (dict.contains(s.substring(start, start + i))
-						&& memo[start + i]) {
+			for (int i = start + 1; i <= end + 1; i++) {
+				if (dict.contains(s.substring(start, i)) && memo[i]) {
 					memo[start] = true;
 				}
 			}
@@ -2803,6 +2818,7 @@ public class Solution {
 	}
 
 	// Binary Tree Preorder Traversal
+	// Full stack version
 	public ArrayList<Integer> preorderTraversal(TreeNode root) {
 		ArrayList<Integer> result = new ArrayList<Integer>();
 		Stack<TreeNode> stack = new Stack<TreeNode>();
@@ -2824,6 +2840,22 @@ public class Solution {
 				}
 			}
 			root = root == null ? null : root.right;
+		}
+		return result;
+	}
+
+	// Binary Tree Preorder Traversal
+	// Simple version
+	public ArrayList<Integer> preorderTraversalSimple(TreeNode root) {
+		ArrayList<Integer> result = new ArrayList<Integer>();
+		Stack<TreeNode> stack = new Stack<TreeNode>();
+		while (!stack.isEmpty() || root != null) {
+			while (root != null) {
+				stack.push(root);
+				result.add(root.val);
+				root = root.left;
+			}
+			root = stack.pop().right;
 		}
 		return result;
 	}
@@ -3019,6 +3051,156 @@ public class Solution {
 			finalTail.next = h2;
 		}
 		return finalHead;
+	}
+
+	// Longest Common Prefix
+	public String longestCommonPrefix(String[] strs) {
+		if (strs == null || strs.length == 0) {
+			return new String();
+		}
+		int len = strs[0].length();
+		for (int i = 0; i < len; i++) {
+			for (int j = 1; j < strs.length; j++) {
+				if (strs[j] == null || strs[j - 1] == null
+						|| i >= strs[j].length() || i >= strs[j - 1].length()
+						|| strs[j].charAt(i) != strs[j - 1].charAt(i)) {
+					return strs[0].substring(0, i);
+				}
+			}
+		}
+		return strs[0];
+	}
+
+	// Valid Parentheses
+	public boolean isValid(String s) {
+		Stack<Character> stack = new Stack<Character>();
+		for (int i = 0; i < s.length(); i++) {
+			if (s.charAt(i) == '(' || s.charAt(i) == '[' || s.charAt(i) == '{') {
+				stack.push(s.charAt(i));
+			} else {
+				if (s.charAt(i) == ')') {
+					if (!stack.isEmpty() && stack.peek() == '(') {
+						stack.pop();
+					} else {
+						return false;
+					}
+				} else if (s.charAt(i) == ']') {
+					if (!stack.isEmpty() && stack.peek() == '[') {
+						stack.pop();
+					} else {
+						return false;
+					}
+				} else if (s.charAt(i) == '}') {
+					if (!stack.isEmpty() && stack.peek() == '{') {
+						stack.pop();
+					} else {
+						return false;
+					}
+				} else {
+					return false;
+				}
+			}
+		}
+		return stack.isEmpty();
+	}
+
+	// Scramble String
+	public boolean isScramble(String s1, String s2) {
+		if (s1 == null || s2 == null || s1.length() != s2.length()) {
+			return false;
+		}
+		int len = s1.length();
+		if (len == 0) {
+			return true;
+		}
+		int[][][] memo = new int[len][len][len + 1];
+		for (int i = 0; i < memo.length; i++) {
+			for (int j = 0; j < memo[i].length; j++) {
+				Arrays.fill(memo[i][j], -1);
+			}
+		}
+		return isScrambleHelper(s1, s2, 0, 0, len, memo);
+	}
+
+	private boolean isScrambleHelper(String s1, String s2, int startS1,
+			int startS2, int len, int[][][] memo) {
+		if (len == 1) {
+			return s1.charAt(startS1) == s2.charAt(startS2);
+		}
+		if (memo[startS1][startS2][len] != -1) {
+			return memo[startS1][startS2][len] == 1;
+		}
+		for (int l = 1; l < len; l++) {
+			boolean result = isScrambleHelper(s1, s2, startS1, startS2, l, memo)
+					&& isScrambleHelper(s1, s2, startS1 + l, startS2 + l, len
+							- l, memo);
+			if (!result) {
+				result = isScrambleHelper(s1, s2, startS1, startS2 + len - l,
+						l, memo)
+						&& isScrambleHelper(s1, s2, startS1 + l, startS2, len
+								- l, memo);
+			}
+			if (result) {
+				memo[startS1][startS2][len] = 1;
+				return true;
+			}
+		}
+		memo[startS1][startS2][len] = 0;
+		return false;
+	}
+
+	// Longest Valid Parenthese
+	public int longestValidParentheses(String s) {
+		return Math.max(
+				longestValidParenthesesHelper(s, 0, s.length(), 1, '('),
+				longestValidParenthesesHelper(s, s.length() - 1, -1, -1, ')'));
+	}
+
+	private int longestValidParenthesesHelper(String s, int start, int end,
+			int step, char paren) {
+		int small = 0;
+		int big = 0;
+		int i = start;
+		int max = 0;
+		while (i != end) {
+			if (s.charAt(i) == paren) {
+				big++;
+			} else {
+				small++;
+				if (small > big) {
+					small = 0;
+					big = 0;
+				} else if (small == big) {
+					max = Math.max(max, small + big);
+				}
+			}
+			i += step;
+		}
+		return max;
+	}
+
+	// Longest Substring Without Repeating Characters
+	public int lengthOfLongestSubstring(String s) {
+		int left = 0;
+		int right = 0;
+		int max = 0;
+		HashSet<Character> memo = new HashSet<Character>();
+		while (left < s.length() && right < s.length()) {
+			if (!memo.contains(s.charAt(right))) {
+				memo.add(s.charAt(right));
+				right++;
+			} else {
+				max = Math.max(max, right - left);
+				while (s.charAt(left) != s.charAt(right)) {
+					memo.remove(s.charAt(left));
+					left++;
+				}
+				left++;
+				right++;
+			}
+		}
+		max = Math.max(max, right - left);
+		return max;
 	}
 
 	public static void main(String[] args) {
