@@ -841,22 +841,21 @@ public class Solution {
 
 	// Permutation Sequence
 	public String getPermutation(int n, int k) {
-		StringBuffer sb = new StringBuffer();
-		for (int i = 1; i <= n; i++) {
-			sb.append(i);
-		}
-		int m = 1;
+		int factorial = 1;
 		for (int i = 1; i <= n - 1; i++) {
-			m *= i;
+			factorial *= i;
+		}
+		StringBuffer sequence = new StringBuffer();
+		for (int i = 1; i <= n; i++) {
+			sequence.append(i);
 		}
 		StringBuffer result = new StringBuffer();
-		while (sb.length() > 0) {
-			int r = (k - 1) / m;
-			result.append(sb.charAt(r));
-			sb.deleteCharAt(r);
-			n--;
-			k -= r * m;
-			m /= (n == 0 ? 1 : n);
+		while (sequence.length() > 0) {
+			int branch = (k - 1) / factorial;
+			result.append(sequence.charAt(branch));
+			sequence.deleteCharAt(branch);
+			k -= (branch * factorial);
+			factorial /= sequence.length() == 0 ? 1 : sequence.length();
 		}
 		return result.toString();
 	}
@@ -3201,6 +3200,53 @@ public class Solution {
 		}
 		max = Math.max(max, right - left);
 		return max;
+	}
+
+	// Best Time to Buy and Sell Stock II
+	public int maxProfitII(int[] prices) {
+		if (prices == null || prices.length == 0) {
+			return 0;
+		}
+		int maxPrice = prices[prices.length - 1];
+		int maxProfit = 0;
+		for (int i = prices.length - 2; i >= 0; i--) {
+			maxProfit += (prices[i] < maxPrice) ? (maxPrice - prices[i]) : 0;
+			maxPrice = prices[i];
+		}
+		return maxProfit;
+	}
+
+	// Next Permutation
+	public void nextPermutation(int[] num) {
+		if (num == null || num.length < 2) {
+			return;
+		}
+		int index = num.length - 2;
+		while (index >= 0 && num[index] >= num[index + 1]) {
+			index--;
+		}
+		if (index == -1) {
+			reverse(num, 0, num.length - 1);
+			return;
+		}
+		int min = num[index + 1];
+		int minIndex = index + 1;
+		for (int i = index + 2; i < num.length; i++) {
+			if (num[i] <= min && num[i] > num[index]) {
+				min = num[i];
+				minIndex = i;
+			}
+		}
+		swap(num, index, minIndex);
+		reverse(num, index + 1, num.length - 1);
+	}
+
+	private void reverse(int[] num, int left, int right) {
+		while (left < right) {
+			swap(num, left, right);
+			left++;
+			right--;
+		}
 	}
 
 	public static void main(String[] args) {
