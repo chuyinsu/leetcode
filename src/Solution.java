@@ -593,6 +593,62 @@ public class Solution {
 		}
 	}
 
+	// Median of Two Sorted Arrays of Equal Length
+	public double findMedianSortedArraysEqualLength(int A[], int B[]) {
+		if (A == null || B == null || A.length == 0 || B.length == 0
+				|| A.length != B.length) {
+			return Double.NaN;
+		}
+		return findMedianSortedArraysEqualLengthHelper(A, 0, A.length - 1, B,
+				0, B.length - 1);
+	}
+
+	private double findMedianSortedArraysEqualLengthHelper(int A[], int leftA,
+			int rightA, int[] B, int leftB, int rightB) {
+		int lenA = rightA - leftA + 1;
+		int lenB = rightB - leftB + 1;
+		assert (lenA == lenB);
+		int len = lenA;
+		if (len == 1) {
+			return (A[leftA] + B[leftB]) / 2D;
+		} else if (len == 2) {
+			int sum = Math.max(A[leftA], B[leftB])
+					+ Math.min(A[rightA], B[rightB]);
+			return sum / 2D;
+		}
+		int indexMidA = leftA + (rightA - leftA) / 2;
+		int indexMidB = leftB + (rightB - leftB) / 2;
+		int midA = (len % 2 == 0) ? (A[indexMidA] + A[indexMidA + 1]) / 2
+				: A[indexMidA];
+		int midB = (len % 2 == 0) ? (B[indexMidB] + B[indexMidB + 1]) / 2
+				: B[indexMidB];
+		if (midA == midB) {
+			if (len % 2 == 0) {
+				return findMedianSortedArraysEqualLengthHelper(A, indexMidA,
+						indexMidA + 1, B, indexMidB, indexMidB + 1);
+			} else {
+				return findMedianSortedArraysEqualLengthHelper(A, indexMidA,
+						indexMidA, B, indexMidB, indexMidB);
+			}
+		} else if (midA > midB) {
+			if (len % 2 == 0) {
+				return findMedianSortedArraysEqualLengthHelper(A, leftA,
+						indexMidA + 1, B, indexMidB, rightB);
+			} else {
+				return findMedianSortedArraysEqualLengthHelper(A, leftA,
+						indexMidA, B, indexMidB, rightB);
+			}
+		} else {
+			if (len % 2 == 0) {
+				return findMedianSortedArraysEqualLengthHelper(A, indexMidA,
+						rightA, B, leftB, indexMidB + 1);
+			} else {
+				return findMedianSortedArraysEqualLengthHelper(A, indexMidA,
+						rightA, B, leftB, indexMidB);
+			}
+		}
+	}
+
 	// Two Sum
 	public int[] twoSum(int[] numbers, int target) {
 		HashMap<Integer, Integer> memo = new HashMap<Integer, Integer>();
@@ -1169,62 +1225,6 @@ public class Solution {
 			}
 		}
 		return result;
-	}
-
-	// Median of Two Sorted Arrays of Equal Length
-	public double findMedianSortedArraysEqualLength(int A[], int B[]) {
-		if (A == null || B == null || A.length == 0 || B.length == 0
-				|| A.length != B.length) {
-			return Double.NaN;
-		}
-		return findMedianSortedArraysEqualLengthHelper(A, 0, A.length - 1, B,
-				0, B.length - 1);
-	}
-
-	private double findMedianSortedArraysEqualLengthHelper(int A[], int leftA,
-			int rightA, int[] B, int leftB, int rightB) {
-		int lenA = rightA - leftA + 1;
-		int lenB = rightB - leftB + 1;
-		assert (lenA == lenB);
-		int len = lenA;
-		if (len == 1) {
-			return (A[leftA] + B[leftB]) / 2D;
-		} else if (len == 2) {
-			int sum = Math.max(A[leftA], B[leftB])
-					+ Math.min(A[rightA], B[rightB]);
-			return sum / 2D;
-		}
-		int indexMidA = leftA + (rightA - leftA) / 2;
-		int indexMidB = leftB + (rightB - leftB) / 2;
-		int midA = (len % 2 == 0) ? (A[indexMidA] + A[indexMidA + 1]) / 2
-				: A[indexMidA];
-		int midB = (len % 2 == 0) ? (B[indexMidB] + B[indexMidB + 1]) / 2
-				: B[indexMidB];
-		if (midA == midB) {
-			if (len % 2 == 0) {
-				return findMedianSortedArraysEqualLengthHelper(A, indexMidA,
-						indexMidA + 1, B, indexMidB, indexMidB + 1);
-			} else {
-				return findMedianSortedArraysEqualLengthHelper(A, indexMidA,
-						indexMidA, B, indexMidB, indexMidB);
-			}
-		} else if (midA > midB) {
-			if (len % 2 == 0) {
-				return findMedianSortedArraysEqualLengthHelper(A, leftA,
-						indexMidA + 1, B, indexMidB, rightB);
-			} else {
-				return findMedianSortedArraysEqualLengthHelper(A, leftA,
-						indexMidA, B, indexMidB, rightB);
-			}
-		} else {
-			if (len % 2 == 0) {
-				return findMedianSortedArraysEqualLengthHelper(A, indexMidA,
-						rightA, B, leftB, indexMidB + 1);
-			} else {
-				return findMedianSortedArraysEqualLengthHelper(A, indexMidA,
-						rightA, B, leftB, indexMidB);
-			}
-		}
 	}
 
 	// Populating Next Right Pointers in Each Node
@@ -2224,6 +2224,7 @@ public class Solution {
 	}
 
 	// Clone Graph
+	// Recursive
 	public UndirectedGraphNode cloneGraph(UndirectedGraphNode node) {
 		if (node == null) {
 			return null;
@@ -2243,6 +2244,39 @@ public class Solution {
 			newNode.neighbors.add(cloneGraphHelper(ugn, cloned));
 		}
 		return newNode;
+	}
+
+	// Clone Graph
+	// Iterative
+	public UndirectedGraphNode cloneGraphIterative(UndirectedGraphNode node) {
+		if (node == null) {
+			return null;
+		}
+		Queue<UndirectedGraphNode> queue = new ArrayDeque<UndirectedGraphNode>();
+		HashMap<UndirectedGraphNode, UndirectedGraphNode> memo = new HashMap<UndirectedGraphNode, UndirectedGraphNode>();
+		queue.offer(node);
+		UndirectedGraphNode copyNode = new UndirectedGraphNode(node.label);
+		memo.put(node, copyNode);
+		while (!queue.isEmpty()) {
+			UndirectedGraphNode origNode = queue.poll();
+			copyNode = getNode(memo, origNode, queue);
+			for (UndirectedGraphNode ugn : origNode.neighbors) {
+				copyNode.neighbors.add(getNode(memo, ugn, queue));
+			}
+		}
+		return memo.get(node);
+	}
+
+	private UndirectedGraphNode getNode(
+			HashMap<UndirectedGraphNode, UndirectedGraphNode> memo,
+			UndirectedGraphNode origNode, Queue<UndirectedGraphNode> queue) {
+		if (!memo.containsKey(origNode)) {
+			UndirectedGraphNode copyNode = new UndirectedGraphNode(
+					origNode.label);
+			memo.put(origNode, copyNode);
+			queue.offer(origNode);
+		}
+		return memo.get(origNode);
 	}
 
 	// Wildcard Matching
@@ -3249,7 +3283,224 @@ public class Solution {
 		}
 	}
 
+	// First Missing Positive
+	public int firstMissingPositive(int[] A) {
+		if (A == null || A.length == 0) {
+			return 1;
+		}
+		int index = 0;
+		while (index < A.length) {
+			if (A[index] != index + 1 && A[index] - 1 >= 0
+					&& A[index] - 1 < A.length && A[A[index] - 1] != A[index]) {
+				int temp = A[A[index] - 1];
+				A[A[index] - 1] = A[index];
+				A[index] = temp;
+			} else {
+				index++;
+			}
+		}
+		for (int i = 0; i < A.length; i++) {
+			if (A[i] != i + 1) {
+				return i + 1;
+			}
+		}
+		return A.length + 1;
+	}
+
+	// Compute a/b in such a way that the recurring part is put in brackets.
+	public String divide(int a, int b) {
+		StringBuffer result = new StringBuffer();
+		HashMap<Integer, Integer> memo = new HashMap<Integer, Integer>();
+		if (b == 0) {
+			throw new RuntimeException("illegal input");
+		}
+		if (a == 0) {
+			return new String("" + 0);
+		}
+		boolean negative = ((a >>> Integer.SIZE - 1) ^ (b >>> Integer.SIZE - 1)) == 1;
+		if (negative) {
+			result.append("-");
+		}
+		a = Math.abs(a);
+		b = Math.abs(b);
+		if (a >= b) {
+			if (a % b == 0) {
+				result.append(a / b);
+				return result.toString();
+			}
+			result.append((a / b) + ".");
+		} else {
+			result.append("0.");
+		}
+		a -= (a / b) * b;
+		a *= 10;
+		while (a % b != 0) {
+			while (a < b) {
+				result.append("0");
+				a *= 10;
+			}
+			memo.put(a, result.length());
+			result.append(a / b);
+			a -= (a / b) * b;
+			a *= 10;
+			if (memo.containsKey(a)) {
+				result.insert(memo.get(a).intValue(), '(');
+				result.append(")");
+				return result.toString();
+			}
+		}
+		result.append(a / b);
+		return result.toString();
+	}
+
+	// Sqrt(x)
+	public int sqrt(int x) {
+		long target = (long) x;
+		long left = 0;
+		long right = 1 << (Integer.SIZE / 2);
+		while (left <= right) {
+			long mid = left + (right - left) / 2;
+			long result = mid * mid;
+			long nearResult = (mid + 1) * (mid + 1);
+			if (result == target) {
+				return (int) mid;
+			} else if (result < target) {
+				if (nearResult > target) {
+					return (int) mid;
+				} else if (nearResult == target) {
+					return (int) (mid + 1);
+				} else {
+					left = mid + 1;
+				}
+			} else {
+				right = mid - 1;
+			}
+		}
+		return -1;
+	}
+
+	// Integer to Binary String
+	public String intToBinary(int n) {
+		int mask = 1 << Integer.SIZE - 1;
+		StringBuffer result = new StringBuffer();
+		boolean start = false;
+		while (mask != 0) {
+			if (!start && ((mask & n) != 0)) {
+				start = true;
+			}
+			if (start) {
+				result.append((mask & n) == 0 ? '0' : '1');
+			}
+			mask >>>= 1;
+		}
+		return result.toString();
+	}
+
+	// Minimum Window Substring
+	public String minWindow(String S, String T) {
+		// 0 - found, 1 - need
+		HashMap<Character, int[]> memo = new HashMap<Character, int[]>();
+		for (int i = 0; i < T.length(); i++) {
+			char c = T.charAt(i);
+			if (memo.containsKey(c)) {
+				(memo.get(c))[1]++;
+			} else {
+				memo.put(c, new int[] { 0, 1 });
+			}
+		}
+		// find the first window
+		int start = 0;
+		int end = 0;
+		int succ = 0;
+		while (end < S.length()) {
+			if (memo.containsKey(S.charAt(end))) {
+				int[] counts = memo.get(S.charAt(end));
+				counts[0]++;
+				if (counts[0] == counts[1]) {
+					succ++;
+				}
+				if (succ == memo.size()) {
+					break;
+				}
+			}
+			end++;
+		}
+		if (succ < memo.size()) {
+			return "";
+		}
+		String result = S.substring(start, end + 1);
+		while (start < S.length() && end < S.length()) {
+			while (start < S.length()) {
+				if (memo.containsKey(S.charAt(start))) {
+					int[] counts = memo.get(S.charAt(start));
+					if (counts[0] > counts[1]) {
+						counts[0]--;
+					} else {
+						break;
+					}
+				}
+				start++;
+			}
+			if (end - start + 1 < result.length()) {
+				result = S.substring(start, end + 1);
+			}
+			end++;
+			while (end < S.length()) {
+				if (memo.containsKey(S.charAt(end))) {
+					int[] counts = memo.get(S.charAt(end));
+					counts[0]++;
+					break;
+				}
+				end++;
+			}
+		}
+		return result;
+	}
+
+	// How many pairs of (m, n) such that m^2 + n^2 < N?
+	public int squareSum(int N) {
+		int zeroCount = 0;
+		int oneZeroCount = 0;
+		int sameCount = 0;
+		int normalCount = 0;
+		int edge = (int) Math.sqrt(N);
+		for (int m = 0; m <= edge; m++) {
+			for (int n = m; n <= edge; n++) {
+				int ss = (int) (Math.pow(m, 2) + Math.pow(n, 2));
+				if (ss < N) {
+					if (m == 0 && n == 0) {
+						zeroCount++;
+					} else if (m == 0 || n == 0) {
+						oneZeroCount++;
+					} else if (m == n) {
+						sameCount++;
+					} else {
+						normalCount++;
+					}
+				}
+			}
+		}
+		return zeroCount + oneZeroCount * 4 + sameCount * 4 + normalCount * 8;
+	}
+
+	// To verify the previous question
+	public int squareSumVerify(int N) {
+		int count = 0;
+		int edge = (int) Math.sqrt(N);
+		for (int i = -edge; i <= edge; i++) {
+			for (int j = -edge; j <= edge; j++) {
+				int ss = (int) (Math.pow(i, 2) + Math.pow(j, 2));
+				if (ss < N) {
+					count++;
+				}
+			}
+		}
+		return count;
+	}
+
 	public static void main(String[] args) {
-		// Solution s = new Solution();
+		Solution s = new Solution();
+		System.out.println(s.squareSum(1000));
+		System.out.println("verify: " + s.squareSumVerify(1000));
 	}
 }
