@@ -3498,9 +3498,53 @@ public class Solution {
 		return count;
 	}
 
+	// Reverse a stack using recursion
+	// http://www.geeksforgeeks.org/reverse-a-stack-using-recursion/
+	public void reverseStack(Stack<Integer> stack) {
+		if (stack == null || stack.size() < 2) {
+			return;
+		}
+		int top = stack.pop();
+		reverseStack(stack);
+		insertStackBottom(stack, top);
+	}
+
+	private void insertStackBottom(Stack<Integer> stack, int element) {
+		if (stack.isEmpty()) {
+			stack.push(element);
+			return;
+		} else {
+			int top = stack.pop();
+			insertStackBottom(stack, element);
+			stack.push(top);
+		}
+	}
+
+	// Binary Tree Maximum Path Sum
+	public int maxPathSum(TreeNode root) {
+		return (maxPathSumHelper(root))[0];
+	}
+
+	private int[] maxPathSumHelper(TreeNode root) {
+		if (root == null) {
+			return new int[] { Integer.MIN_VALUE, Integer.MIN_VALUE };
+		}
+		if (root.left == null && root.right == null) {
+			return new int[] { root.val, root.val };
+		}
+		int[] leftResult = maxPathSumHelper(root.left);
+		int[] rightResult = maxPathSumHelper(root.right);
+		int localMax = root.val;
+		localMax += leftResult[1] > 0 ? leftResult[1] : 0;
+		localMax += rightResult[1] > 0 ? rightResult[1] : 0;
+		int globalMax = Math.max(leftResult[0], rightResult[0]);
+		globalMax = Math.max(globalMax, localMax);
+		int leafPath = Math.max(leftResult[1], rightResult[1]);
+		return new int[] { globalMax,
+				leafPath > 0 ? leafPath + root.val : root.val };
+	}
+
 	public static void main(String[] args) {
-		Solution s = new Solution();
-		System.out.println(s.squareSum(1000));
-		System.out.println("verify: " + s.squareSumVerify(1000));
+		// Solution s = new Solution();
 	}
 }
